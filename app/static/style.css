@@ -1,0 +1,73 @@
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+h1, h2, p {
+    text-align: center;
+    margin: 10px;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1; /* Takes all available space */
+}
+
+footer {
+    background-color: #bbb;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+#galleries {
+    padding: 0;
+    text-align: center;
+    list-style-type: none;
+}
+
+#galleries li {
+    margin: 10px 0;
+}
+
+#inputs {
+    width: max-content;
+    margin: 10px auto;
+}
+
+#inputs input {
+    vertical-align: middle;
+}
+
+/* grid */
+#grid {
+    position: relative;
+    margin: 0 auto;
+}
+.hexagon div.tile {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+.tile {
+    position: absolute;
+    z-index: 2;
+}
+.selected {
+    filter: brightness(1.3);
+    z-index: 3;
+}
+.in-place {
+    filter: brightness(0.7);
+    z-index: 4;
+}
+.target {
+    filter: brightness(0.4);
+}
+div.tile:not(.in-place) {
+    cursor: grab;
+}

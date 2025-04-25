@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Swap Tiles</h1>
+    <ul id="galleries">
+        {% for gallery in galleries %}
+            <li><a href="/{{ gallery }}">{{ gallery.replace('-', ' ').title() }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="inputs">
+        <label><b>Swap Tiles</b></label>
+        <select name="shape" id="shape">
+            <option value="HEXAGON">Hexagon</option>
+            <option value="SQUARE">Square</option>
+        </select>
+        <label>width:</label>
+        <input type="range" name="width" id="widthInput" min="100" max="250" step="10" value="250" />
+        <label id="widthValue">250px | </label>
+        <input type="checkbox" id="rotation" name="rotation" />
+        <label for="rotation">rotation</label>
+        <button id="reshuffle" type="button">Shuffle</button>
+        <input type="file" id="fileInput" accept="image/*"/>
+    </div>
+
+    <div id="grid"></div>
+
+    <div style="display: none;">
+        <img id="originalImage" src="/static/paintings/{{ slug }}.jpg">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="details">
+        <h1>{{ title }}</h1>
+        <h2>by {{ author }}, {{ year }}</h2>
+    </div>
+    
+    <p><a href="/">home</a> | <a href="{{ next }}">next</a></p>
+
+    <script src="/static/script.js"></script>
+{% endblock %}
