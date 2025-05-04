@@ -1,34 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div id="inputs">
-        <label><b>Swap Tiles</b></label>
-        <select name="shape" id="shape">
-            <option value="HEXAGON">Hexagon</option>
-            <option value="SQUARE">Square</option>
+    <div id="controls">
+        <select id="shapeDropdown" class="btn">
+            <option value="HEXAGON">⬢</option>
+            <option value="SQUARE">■</option>
+            <option value="TRIANGLE">▼</option>
         </select>
-        <label>width:</label>
-        <input type="range" name="width" id="widthInput" min="100" max="250" step="10" value="250" />
-        <label id="widthValue">250px | </label>
-        <input type="checkbox" id="rotation" name="rotation" />
-        <label for="rotation">rotation</label>
-        <button id="reshuffle" type="button">Shuffle</button>
-        <input type="file" id="fileInput" accept="image/*"/>
+        <button id="rotationBtn" class="btn">⤾</button>
+        <button id="minusSize" class="btn">➖</button>
+        <label id="sizeLabel">100</label>
+        <button id="plusSize" class="btn">➕</button>
+        <a href="/" class="btn">⧋</a>
+        <a href="{{ next }}" class="btn">⧐</a>
     </div>
 
-    <div id="grid"></div>
-
-    <div style="display: none;">
-        <img id="originalImage" src="/static/paintings/{{ slug }}.jpg">
-        <canvas id="canvas"></canvas>
-    </div>
+    <div id="mosaic"></div>
 
     <div id="details">
         <h1>{{ title }}</h1>
         <h2>by {{ author }}, {{ year }}</h2>
     </div>
     
-    <p><a href="/">home</a> | <a href="{{ next }}">next</a></p>
+    <div style="width: max-content; margin: 10px auto;">
+        <input type="file" id="fileInput" accept="image/*"/>
+    </div>
 
-    <script src="/static/script.js"></script>
+    <div style="display: none;">
+        <img id="fullImage" src="/static/paintings/{{ slug }}.jpg">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script src="/static/tile.js"></script>
+    <script src="/static/mosaic.js"></script>
+    <script src="/static/controller.js"></script>
 {% endblock %}

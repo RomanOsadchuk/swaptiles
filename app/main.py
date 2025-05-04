@@ -4,14 +4,22 @@ from starlette.routing import Mount, Route
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 
-from database import GALLERIES, painting_context
+from database import GALLERIES, MOBILE, painting_context
 
 STATIC_DIR = 'static/'
 templates = Jinja2Templates(directory=STATIC_DIR)
 
 
+def _detect_mobile_agent(request):
+    for mobile_platform in ('Android', 'iPhone'):
+        if mobile_platform in request.headers['user-agent']:
+            return True
+    return False
+
+
 async def homepage(request):
-    context = {'request': request, 'galleries': list(GALLERIES.keys())}
+    galleries = MOBILE if _detect_mobile_agent(request) else GALLERIES.keys()
+    context = {'request': request, 'galleries': galleries}
     return templates.TemplateResponse('homepage.html', context=context)
 
 
