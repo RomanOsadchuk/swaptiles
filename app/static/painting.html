@@ -9,29 +9,35 @@
         </select>
         <button id="rotationBtn" class="btn">⤾</button>
         <button id="minusSize" class="btn">➖</button>
-        <label id="sizeLabel">100</label>
+        <label id="sizeLabel"></label>
         <button id="plusSize" class="btn">➕</button>
         <a href="/" class="btn">⧋</a>
         <a href="{{ next }}" class="btn">⧐</a>
     </div>
 
-    <div id="mosaic"></div>
+    <p id="hintText"></p>
+
+    <div id="mosaic">
+        <img id="fullImage" src="/static/paintings/{{ slug }}.jpg">
+    </div>
 
     <div id="details">
         <h1>{{ title }}</h1>
         <h2>by {{ author }}, {{ year }}</h2>
     </div>
     
-    <div style="width: max-content; margin: 10px auto;">
+    <div style="width: max-content; margin: 0 auto;">
         <input type="file" id="fileInput" accept="image/*"/>
     </div>
 
     <div style="display: none;">
-        <img id="fullImage" src="/static/paintings/{{ slug }}.jpg">
         <canvas id="canvas"></canvas>
     </div>
 
+    <script src="/static/shapes.js"></script>
     <script src="/static/tile.js"></script>
+    <script src="/static/cropper.js"></script>
+    <script src="/static/swapper.js"></script>
     <script src="/static/mosaic.js"></script>
     <script src="/static/controller.js"></script>
 {% endblock %}

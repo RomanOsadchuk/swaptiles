@@ -2,7 +2,6 @@
 
 const CONTROLLER = {
     file_reader: new FileReader(),
-    mobile: /Mobi|Android|iPhone/i.test(navigator.userAgent),
     file_input: document.getElementById('fileInput'),
     shape_input: document.getElementById('shapeDropdown'),
     rotation_btn: document.getElementById('rotationBtn'),
@@ -10,35 +9,34 @@ const CONTROLLER = {
     minus_size_btn: document.getElementById('minusSize'),
 
     changeShape: function() {
-        SHAPE = CONTROLLER.shape_input.value;
-        MOSAIC.initiating.go();
+        RESET_SHAPE(CONTROLLER.shape_input.value);
+        MOSAIC.go();  // reSet
     },
 
     toggleRotation: function() {
-        if (CONTROLLER.rotation_btn.classList.contains('active'))
-            CONTROLLER.rotation_btn.classList.remove('active');
-        else
-            CONTROLLER.rotation_btn.classList.add('active')
+        document.getElementById('hintText').textContent = MOBILE ?
+            'Multi Tap to rotate' : 'Multi Click to rotate';
+        if (this.classList.contains('active'))
+            this.classList.remove('active');
+        else this.classList.add('active')
         ROTATION = !ROTATION;
-        MOSAIC.initiating.go();
+        MOSAIC.go();
     },
 
     sizeInc: function() {
-        let max_size = CONTROLLER.mobile ? 195 : 295;
-        if (SIZE > max_size)
-            return;
-        SIZE += 10;
+        let max_size = MOBILE ? 195 : 295;
+        if (SIZE > max_size) return;
+        SHAPE.rescale(SIZE + 10);
         document.getElementById('sizeLabel').textContent = SIZE;
-        MOSAIC.initiating.go();
+        MOSAIC.go();
     },
 
     sizeDec: function() {
-        let min_size = CONTROLLER.mobile ? 75 : 125;
-        if (SIZE < min_size)
-            return;
-        SIZE -= 10;
+        let min_size = MOBILE ? 75 : 125;
+        if (SIZE < min_size) return;
+        SHAPE.rescale(SIZE - 10);
         document.getElementById('sizeLabel').textContent = SIZE;
-        MOSAIC.initiating.go();
+        MOSAIC.go();
     },
 
     newFileUploaded: function() {
@@ -56,11 +54,13 @@ const CONTROLLER = {
         CONTROLLER.plus_size_btn.onclick = CONTROLLER.sizeInc;
         CONTROLLER.minus_size_btn.onclick = CONTROLLER.sizeDec;
 
-        SIZE = CONTROLLER.mobile ? 130 : 250;
-        document.getElementById('sizeLabel').textContent = SIZE;
-        MOSAIC.initiating.go();
+        MOSAIC.go();
     }
 };
 
 
+document.getElementById('sizeLabel').textContent = SIZE;
+document.getElementById('hintText').textContent = MOBILE ?
+    'Drag tile with finger to swap' : 'Drag tile with a cursor to swap';
+RESET_SHAPE('HEXAGON');
 window.onload = CONTROLLER.initiate;
