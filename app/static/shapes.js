@@ -1,5 +1,4 @@
-const ROOT_3 = Math.sqrt(3),
-      MOBILE = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+const ROOT_3 = Math.sqrt(3);
 
 
 var SquareTile = (size) => {
@@ -9,6 +8,7 @@ var SquareTile = (size) => {
         offset_x: size, offset_y: size,
         tile_width: size, tile_height: size,
         shifted_rows: [],
+        rotation_matrix: [[0, -1], [1, 0]],
 
         x0AgainstRoot: function(root_width) {
             return Math.floor(root_width % this.tile_width / 2);
@@ -23,36 +23,32 @@ var SquareTile = (size) => {
         }
     }
 },
-//  ╏ tile_width == offset_x    ╏                   
-// -╏---------------------------╏-                 --╏--
-//              / ╏ \                                ╏
-//           /    ╏    \                             ╏
-//        /       ╏       \                          ╏
-//     /          ╏          \                       ╏
-//                ╏                                  ╏
-//  |             ╏shifted_row  |                    ╏
-//  |             ╏.offset_y    |                    ╏
-//  |             ╏             |                    ╏
-//  | shifted_row ╏             |                    ╏o
-//  | .offset_x   ╏             |              ╏     ╏f
-//  |-------------╏-           -|---------------     ╏f
-//                                             ╏     ╏s
-//     \                     /    \            ╏     ╏e
-//        \               /          \         ╏t    ╏t
-//           \         /                \      ╏i    ╏
-//              \   /                      \   ╏l    ╏y
-//                                             ╏e    ╏
-//                |                           |╏     ╏
-//                |                           |╏h    ╏
-//                |                           |╏e    ╏
-//                |                           |╏i    ╏
-//                |                           |╏g    ╏
-//                                             ╏h    ╏
-//                   \                     /   ╏t    ╏
-//                      \               /      ╏     ╏
-//                         \         /         ╏     ╏
-//                            \   /            ╏     ╏
-//                               --------------------╏-
+//             ╏tile_width == offset_x ╏   ?period_x                
+//      --╏----╏-----------------------╏--
+//        ╏    ╏         / ╏ \         ╏
+//        ╏    ╏      /    ╏    \      ╏
+//        ╏    ╏   /       ╏       \   ╏
+//        ╏    ╏/          ╏          \╏
+//        ╏    |           ╏shifted_row|
+//      o ╏    |           ╏  .offset_y|
+//      f ╏    |           ╏           |
+//      f ╏    |shifted_row╏           |
+//      s ╏    |  .offset_x╏           |
+//      e ╏   -╏-----------╏-          ╏--------------╏--
+//      t ╏     \                     / \             ╏
+//     |  ╏        \               /       \          ╏
+//      y ╏           \         /             \       ╏ t
+//        ╏              \   /                   \    ╏ i
+//        ╏                ╏                       ╏  ╏ l
+//        ╏                |                       |  ╏ e
+//        ╏                |                       |  ╏  |
+//        ╏                |                       |  ╏ h
+//        ╏                |                       |  ╏ e
+//      --╏----------------  \                   /    ╏ i
+//                              \             /       ╏ h
+//                                 \       /          ╏ t
+//                                    \ /             ╏
+//                                      --------------╏--
     HexagonTile = (size) => {
     return {
         name: 'HEXAGON',
@@ -61,6 +57,7 @@ var SquareTile = (size) => {
         tile_height: Math.floor(size * 2 / ROOT_3),
         offset_y: Math.floor(size * 3 / ROOT_3),
         clip_path: 'hexagon-path',
+        rotation_matrix: [[0.5, -ROOT_3/2], [ROOT_3/2, 0.5]],
 
         shifted_rows: [{  // even row
             offset_x: Math.floor(size / 2),
@@ -85,11 +82,22 @@ var SquareTile = (size) => {
         }
     }
 },
-//  ╏ tile_widt == offset_x ╏                   
-// -╏-----------------------╏-                   
-//  ╏                       ╏triangle center at the tile square center
-//  ╏shifted_row╏           ╏for proper rotation
-//  ╏.offset_x  ╏           ╏ 
+//                       --------╏--
+//                               ╏
+//      _ _ _ _ _  _____________ ╏
+//       ╏        /\           / ╏ tile_height
+//       ╏       /  \         /  ╏
+//       ╏      /    \       /   ╏ (bigger than actual triangle, cause we need:)
+//     p ╏     /      \     /    ╏ (tile center == triangle center [for rotation])
+//     e ╏    /        \   /     ╏
+//     r ╏   /tile_width\ /      ╏
+//     i ╏  ╏————————————╏-------╏--
+//     o ╏   \ period_x / \
+//     d ╏    \        /   \
+//    |  ╏     \      /     \ 
+//     y ╏      \    /       \
+//       ╏       \  /         \
+//      _╏_ _ _ _ \/___________\
 
     TriangleTile = (size) => {
     return {
@@ -99,6 +107,7 @@ var SquareTile = (size) => {
         tile_height: Math.floor(size * 2 / ROOT_3),
         offset_y: Math.floor(size * ROOT_3),
         clip_path: 'triangle-A-path',
+        rotation_matrix: [[-0.5, -ROOT_3/2], [ROOT_3/2, -0.5]],
 
         shifted_rows: [{
             offset_x: Math.floor(size / 2),
@@ -148,8 +157,8 @@ const GRID = {
     x0: 0,  // to do something
     y0: 0,
 
-    tile_size: MOBILE ? 100 : 200,
-    tile_shape: HexagonTile(MOBILE ? 100 : 200),
+    tile_size: 100,
+    tile_shape: SquareTile(100),
 
     resizeTile: function(size) {
         this.tile_size = size;
@@ -182,7 +191,6 @@ const GRID = {
         this.image.style.position = 'absolute';
         this.image.style.left = this.x0 + 'px';
         this.image.style.top = this.y0 + 'px';
-        this.perform_rescale = false;
         this.image.src = this.canvas.toDataURL('image/jpeg');
         // wait for image loading, reCrop on load
     },

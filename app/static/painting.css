@@ -142,7 +142,7 @@
     z-index: 3;
 }
 .target {
-    filter: brightness(0.4);
+    filter: brightness(0.2);
 }
 
 .hexagon-path { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
