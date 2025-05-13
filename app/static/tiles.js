@@ -38,11 +38,7 @@ const TILES = {
             (t) => t.classList.remove(class_name));
     },
 
-    fitImageAndShuffle: function(size) {
-        if (size) {
-            GRID.tile_size = size;
-            GRID.tile_shape = HexagonTile(size);
-        }
+    fitImageAndShuffle: function() {
         GRID.image.onload = function() {
             GRID.reCrop();
             TILES.shuffle();

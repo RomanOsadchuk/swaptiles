@@ -1,10 +1,31 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Swap Tiles</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/homepage.css">
+</head>
 
-{% block content %}
-    <h1>Swap Tiles</h1>
-    <ul id="galleries">
+<body>
+    <header><h1>Swap Tiles</h1></header>
+    <main>
         {% for gallery in galleries %}
-            <li><a href="/{{ gallery }}">{{ gallery.replace('-', ' ').title() }}</a></li>
+            <div class="gallery">
+                <a href="/{{ gallery }}">
+                    <img src="/static/paintings/{{ gallery }}/_thumbnail.jpg">
+                    <div class="gallery-name">{{ gallery.replace('-', ' ').title() }}</div>
+                </a>
+            </div>
         {% endfor %}
-    </ul>
-{% endblock %}
+    </main>
+
+    <footer>
+        <p>All artworks are public domain in the EU</p>
+        <p>© <a target="_blank" href="https://github.com/RomanOsadchuk/swaptiles">minimalist design</a> by Roman Osadchuk</p>
+        <p>russia is a terrorist state</p>
+    </footer>
+</body>
+</html>
+

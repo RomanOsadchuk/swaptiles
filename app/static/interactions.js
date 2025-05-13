@@ -34,6 +34,9 @@ const HINTS = {
     },
 
     _wrap: function(msg) {
+        if (GRID.misorientation && MOBILE) return 'Rotate Your Device';
+        // return GRID.root.clientWidth + '|' + GRID.root.clientHeight;
+        // return GRID.image.width + ' - ' + GRID.image.height
         if (TILES.getArray().length == 0) {
             this.elem.style.color = 'red';
             msg = 'FINISH';
@@ -67,7 +70,7 @@ const MOSAIC_INTERACTION = {
     start: function(event) {
         event.preventDefault();
         MENU_INTERACTION.about_div.style.display = 'none';
-        MENU_INTERACTION.sub_menu.style.display == 'none'
+        MENU_INTERACTION.sub_menu.style.display = 'none';
 
         if (this.highlight_mode) return;
         this.highlight_mode = (event.button == 2);
@@ -115,6 +118,10 @@ const MOSAIC_INTERACTION = {
 
     wheel: function(event) {
         event.preventDefault();
+
+        if (Date.now() - (this.wheel_t || 0) < 500) return;
+        this.wheel_t = Date.now()
+
         let positive = event.deltaX > 0 || event.deltaY > 0;
         if (SWAP.main_target && TILES.rotation) {  // is shifting
             SWAP.rotateStep(positive);
@@ -142,6 +149,7 @@ const MENU_INTERACTION = {
     triangle_btn: document.getElementById('triangleBtn'),
     square_btn: document.getElementById('squareBtn'),
     about_btn: document.getElementById('aboutBtn'),
+    file_input: document.getElementById('fileInput'),
 
     toggleSubMenu: function() {
         MENU_INTERACTION.about_div.style.display = 'none';
@@ -202,6 +210,19 @@ const MENU_INTERACTION = {
 
         if (TILES.rotation) HINTS.hintRotate();
         else HINTS.reset();
+    },    
+
+    loadUserImage: function() {
+        let file = MENU_INTERACTION.file_input.files[0],
+            reader = new FileReader(),
+            about = document.getElementById('about');
+
+        GRID.initial_image.onload = TILES.fitImageAndShuffle;
+        reader.onload = (e) => { GRID.initial_image.src = e.target.result; };
+
+        if (file) reader.readAsDataURL(file);
+        if (about) about.remove();
+        MENU_INTERACTION.about_btn.remove();
     },
 
     initiate: function() {
@@ -214,12 +235,12 @@ const MENU_INTERACTION = {
         MENU_INTERACTION.rotation_btn.onclick = MENU_INTERACTION.toggleRotation;
         MENU_INTERACTION.about_btn.onclick = MENU_INTERACTION.toggleAbout;
 
-        screen.orientation.addEventListener("change", (event) => {
-          TILES.fitImageAndShuffle();
-        });
+        MENU_INTERACTION.file_input.onchange = MENU_INTERACTION.loadUserImage;
+
+        screen.orientation.addEventListener("change", TILES.fitImageAndShuffle);
 
         MOSAIC_INTERACTION.initiate();
-        TILES.fitImageAndShuffle(MOBILE ? 120 : 250);
+        TILES.fitImageAndShuffle();
     }
 };
 

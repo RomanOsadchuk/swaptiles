@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
     <title>Swap Tiles - {{ title }}</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/painting.css">
@@ -15,7 +15,7 @@
             <a href="{{ next }}" class="btn next-path"></a>
         </div>
         <div class="center-buttons">
-            <button class="btn romb-path">...</button>
+            <label class="btn romb-path" for="fileInput">...</label>
             <button id="shapeBtn" class="btn hex-button"></button>
         </div>
         <div>
@@ -45,8 +45,9 @@
         <div id="mosaic"><img id="fullImage"></img></div>
     </div>
 
-    <img id="initialImage" src="/static/paintings/{{ slug }}.jpg" style="display: none;"></img>
+    <img id="initialImage" src="/static/paintings/{{ gallery }}/{{ slug }}.jpg" style="display: none;"></img>
     <canvas id="canvas" style="display: none;"></canvas>
+    <input id="fileInput" type="file" accept="image/*" style="display: none;"/>
   </main>
 
     <script src="/static/shapes.js"></script>

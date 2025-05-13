@@ -42,6 +42,7 @@
       color: white;
       text-decoration: none;
       cursor: pointer;
+      text-align: center;
     }
 
     .info {
@@ -77,6 +78,8 @@
 
     #about {
       background-color: #bbb;
+      padding: 20px;
+      text-align: center;
     }
 
 

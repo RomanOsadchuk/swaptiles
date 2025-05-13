@@ -66,7 +66,9 @@ var SquareTile = (size) => {
         }],
 
         x0AgainstRoot: function(root_width) {
-            return Math.floor(root_width % this.tile_width / 2);
+            let remaining = (root_width - this.tile_width / 2) % this.tile_width;
+            if (remaining > this.tile_width / 2) remaining -= this.tile_width / 2;
+            return Math.floor(remaining / 2);
         },
 
         y0AgainstRoot: function(root_height) {
@@ -86,7 +88,7 @@ var SquareTile = (size) => {
 //                               ╏
 //      _ _ _ _ _  _____________ ╏
 //       ╏        /\           / ╏ tile_height
-//       ╏       /  \         /  ╏
+//       ╏       /  \    .    /  ╏
 //       ╏      /    \       /   ╏ (bigger than actual triangle, cause we need:)
 //     p ╏     /      \     /    ╏ (tile center == triangle center [for rotation])
 //     e ╏    /        \   /     ╏
@@ -124,7 +126,9 @@ var SquareTile = (size) => {
         }],
 
         x0AgainstRoot: function(root_width) {
-            return Math.floor(root_width % this.tile_width / 2);
+            let remaining = (root_width - this.tile_width / 2) % this.tile_width;
+            if (remaining > this.tile_width / 2) remaining -= this.tile_width / 2;
+            return Math.floor(remaining / 2);
         },
 
         y0AgainstRoot: function(root_height) {
@@ -154,6 +158,7 @@ const GRID = {
     canvas: document.getElementById('canvas'),
     image: document.getElementById('fullImage'),
     initial_image: document.getElementById('initialImage'),
+    misorientation: false,
     x0: 0,  // to do something
     y0: 0,
 
@@ -177,14 +182,16 @@ const GRID = {
             h = Math.floor(this.root.clientHeight),
             W = this.initial_image.width,
             H = this.initial_image.height,
-            misorientation = (w > h) != (W > H),
             ratio = Math.min(w/W, h/H),
             ctx = this.canvas.getContext('2d');
+        this.misorientation = (w > h) != (W > H);
 
         w = Math.floor(W * ratio);  h = Math.floor(H * ratio);
+        this.tile_size = Math.floor(Math.min(w/2.5, h/2.5));
+        this.tile_shape = HexagonTile(this.tile_size);
+
         this.canvas.width = w;      this.canvas.height = h;
-        ctx.drawImage(this.initial_image, 0, 0, w, h);
-        
+        ctx.drawImage(this.initial_image, 0, 0, w, h);        
         this.x0 = Math.floor((this.root.clientWidth - w) / 2);
         this.y0 = Math.floor((this.root.clientHeight - h) / 2);
 

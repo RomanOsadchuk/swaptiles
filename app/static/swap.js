@@ -8,7 +8,6 @@ const SWAP = {
     main_tile: null,
     main_target: null,
 
-    // todo - check calling brackets ()
     // _isShifting: function() { return this.shift_t0 > 0; },
     _shortTap: function() { return (Date.now() - this.shift_t0) < 200; },
 

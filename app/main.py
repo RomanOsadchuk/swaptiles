@@ -1,10 +1,9 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 
-from database import GALLERIES, MOBILE, painting_context
+from database import getGalleries, getPainting
 
 STATIC_DIR = 'static/'
 templates = Jinja2Templates(directory=STATIC_DIR)
@@ -18,20 +17,20 @@ def _detect_mobile_agent(request):
 
 
 async def homepage(request):
-    galleries = MOBILE if _detect_mobile_agent(request) else GALLERIES.keys()
-    context = {'request': request, 'galleries': galleries}
+    # galleries = MOBILE if _detect_mobile_agent(request) else GALLERIES.keys()
+    context = {'request': request, 'galleries': getGalleries()}
     return templates.TemplateResponse('homepage.html', context=context)
 
 
 async def gallery(request):
-    context = painting_context(request.path_params['gallery'])
+    context = getPainting(request.path_params['gallery'])
     context['request'] = request
     return templates.TemplateResponse('painting.html', context=context)
 
 
 async def painting(request):
-    context = painting_context(request.path_params['gallery'],
-                               request.path_params['painting'])
+    context = getPainting(request.path_params['gallery'],
+                          request.path_params['painting'])
     context['request'] = request
     return templates.TemplateResponse('painting.html', context=context)
 
