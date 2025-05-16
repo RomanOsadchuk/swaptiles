@@ -1,127 +1,127 @@
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-    }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
 
-    body {
-      display: flex;
-      flex-direction: column; /* Portrait default */
-    }
+body {
+  display: flex;
+  flex-direction: column; /* Portrait default */
+}
 
-    .button-array {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px;
-      background-color: #bbb;
-    }
+.button-array {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #bbb;
+}
 
-    .button-array div {
-      display: flex;
-      gap: 10px;
-    }
+.button-array div {
+  display: flex;
+  gap: 10px;
+}
 
-    .start-buttons{
-      justify-content: flex-start;
-    }
+.start-buttons{
+  justify-content: flex-start;
+}
 
-    .center-buttons {
-      justify-content: center;
-      flex: 1;
-    }
+.center-buttons {
+  justify-content: center;
+  flex: 1;
+}
 
-    .btn {
-      height: 40px;
-      width: 40px;
-      font-size: 20px;
-      border: none;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      cursor: pointer;
-      text-align: center;
-    }
+.btn {
+  height: 40px;
+  width: 40px;
+  font-size: 20px;
+  border: none;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+}
 
-    .info {
-      margin: auto 0;
-      height: max-content;
-      width: max-content;
-      font-size: 20px;
-    }
+.info {
+  margin: auto 0;
+  height: max-content;
+  width: max-content;
+  font-size: 20px;
+}
 
-    main {
-      display: block;
-      position: relative;
-      z-index: 1;
-      flex: 1;
-    }
+main {
+  display: block;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+}
 
-    #content {
-      display: flex;
-      flex-direction: column;
-      position: absolute;
-      height: 100%;
-      width: 100%;
-      left: 0px;
-      top: 0px;
-      z-index: -1;
-    }
+#content {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+  z-index: -1;
+}
 
-    #message {
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
+#message {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
-    #about {
-      background-color: #bbb;
-      padding: 20px;
-      text-align: center;
-    }
+#about {
+  background-color: #bbb;
+  padding: 20px;
+  text-align: center;
+}
 
 
-    .rotation-color { background-color: #db9834; }
+.rotation-color { background-color: #db9834; }
 
-    .tre-button { clip-path: polygon(0% 0%, 100% 30%, 30% 100%); }
-    .hex-button { clip-path: polygon(0% 50%, 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%); width: 48px; }
-    .home-path { clip-path: polygon(50% 0%, 100% 75%, 75% 75%, 75% 100%, 25% 100%, 25% 75%, 0% 75%); }
-    .next-path { clip-path: polygon(100% 50%, 25% 100%, 25% 75%, 0% 75%, 0% 25%, 25% 25%, 25% 0%); }
-    .romb-path { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
-    .circle-path { clip-path: circle(50%); }
+.tre-button { clip-path: polygon(0% 0%, 100% 30%, 30% 100%); }
+.hex-button { clip-path: polygon(0% 50%, 25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%); width: 48px; }
+.home-path { clip-path: polygon(50% 0%, 100% 75%, 75% 75%, 75% 100%, 25% 100%, 25% 75%, 0% 75%); }
+.next-path { clip-path: polygon(100% 50%, 25% 100%, 25% 75%, 0% 75%, 0% 25%, 25% 25%, 25% 0%); }
+.romb-path { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+.circle-path { clip-path: circle(50%); }
 
-    /* Landscape orientation */
-    @media (orientation: landscape) {
-      body {
-        flex-direction: row;
-        height: 100%;
-      }
+/* Landscape orientation */
+@media (orientation: landscape) {
+  body {
+    flex-direction: row;
+    height: 100%;
+  }
 
-      .button-array {
-        flex-direction: column;
-        width: max-content;
-        height: 97%;
-      }
+  .button-array {
+    flex-direction: column;
+    width: max-content;
+    height: 97%;
+  }
 
-      .button-array div {
-        flex-direction: column;
-      }
+  .button-array div {
+    flex-direction: column;
+  }
 
-      .btn {
-        height: 40px;
-        width: 40px;
-      }
+  .btn {
+    height: 40px;
+    width: 40px;
+  }
 
-      .info {
-        height: max-content;
-        width: max-content;
-        margin: 0 auto;
-        font-size: 30px;
-      }
-      .hex-button { clip-path: polygon(50% 0%, 0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%); width: 40px; height: 48px; }
-    }
+  .info {
+    height: max-content;
+    width: max-content;
+    margin: 0 auto;
+    font-size: 30px;
+  }
+  .hex-button { clip-path: polygon(50% 0%, 0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%); width: 40px; height: 48px; }
+}
 
 
 

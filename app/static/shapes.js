@@ -1,11 +1,11 @@
 const ROOT_3 = Math.sqrt(3);
 
 
-var SquareTile = (size) => {
+var SquarePattern = (size) => {
     return {
         name: 'SQUARE',
         rotation_degree: 90,
-        offset_x: size, offset_y: size,
+        period_x: size, period_y: size,
         tile_width: size, tile_height: size,
         shifted_rows: [],
         rotation_matrix: [[0, -1], [1, 0]],
@@ -23,19 +23,19 @@ var SquareTile = (size) => {
         }
     }
 },
-//             ╏tile_width == offset_x ╏   ?period_x                
-//      --╏----╏-----------------------╏--
+//             ╏tile_width == period_x ╏                
+//      --╏----╏-----------------------╏-
 //        ╏    ╏         / ╏ \         ╏
 //        ╏    ╏      /    ╏    \      ╏
 //        ╏    ╏   /       ╏       \   ╏
 //        ╏    ╏/          ╏          \╏
 //        ╏    |           ╏shifted_row|
-//      o ╏    |           ╏  .offset_y|
-//      f ╏    |           ╏           |
-//      f ╏    |shifted_row╏           |
-//      s ╏    |  .offset_x╏           |
-//      e ╏   -╏-----------╏-          ╏--------------╏--
-//      t ╏     \                     / \             ╏
+//      p ╏    |           ╏  .offset_y|
+//      e ╏    |           ╏           |
+//      r ╏    |shifted_row╏           |
+//      i ╏    |  .offset_x╏           |
+//      o ╏   -╏-----------╏-          ╏--------------╏--
+//      d ╏     \                     / \             ╏
 //     |  ╏        \               /       \          ╏
 //      y ╏           \         /             \       ╏ t
 //        ╏              \   /                   \    ╏ i
@@ -49,17 +49,17 @@ var SquareTile = (size) => {
 //                                 \       /          ╏ t
 //                                    \ /             ╏
 //                                      --------------╏--
-    HexagonTile = (size) => {
+    HexagonPattern = (size) => {
     return {
         name: 'HEXAGON',
         rotation_degree: 60,
-        tile_width: size, offset_x: size,
+        tile_width: size, period_x: size,
         tile_height: Math.floor(size * 2 / ROOT_3),
-        offset_y: Math.floor(size * 3 / ROOT_3),
+        period_y: Math.floor(size * 3 / ROOT_3),
         clip_path: 'hexagon-path',
         rotation_matrix: [[0.5, -ROOT_3/2], [ROOT_3/2, 0.5]],
 
-        shifted_rows: [{  // even row
+        shifted_rows: [{
             offset_x: Math.floor(size / 2),
             offset_y: Math.floor(size * ROOT_3 / 2),
             clip_path: 'hexagon-path'
@@ -86,7 +86,7 @@ var SquareTile = (size) => {
 },
 //                       --------╏--
 //                               ╏
-//      _ _ _ _ _  _____________ ╏
+//    _ _ _ _ _ _  _____________ ╏
 //       ╏        /\           / ╏ tile_height
 //       ╏       /  \    .    /  ╏
 //       ╏      /    \       /   ╏ (bigger than actual triangle, cause we need:)
@@ -97,17 +97,17 @@ var SquareTile = (size) => {
 //     o ╏   \ period_x / \
 //     d ╏    \        /   \
 //    |  ╏     \      /     \ 
-//     y ╏      \    /       \
+//     y ╏      \    /   .   \
 //       ╏       \  /         \
-//      _╏_ _ _ _ \/___________\
+//    _ _╏_ _ _ _ \/___________\
 
-    TriangleTile = (size) => {
+    TrianglePattern = (size) => {
     return {
         name: 'TRIANGLE',
         rotation_degree: 120,
-        tile_width: size, offset_x: size,
+        tile_width: size, period_x: size,
         tile_height: Math.floor(size * 2 / ROOT_3),
-        offset_y: Math.floor(size * ROOT_3),
+        period_y: Math.floor(size * ROOT_3),
         clip_path: 'triangle-A-path',
         rotation_matrix: [[-0.5, -ROOT_3/2], [ROOT_3/2, -0.5]],
 
@@ -134,7 +134,7 @@ var SquareTile = (size) => {
         y0AgainstRoot: function(root_height) {
             // the period is double row
             let row_height = this.tile_height - this.shifted_rows[0].offset_y,
-                row_offset = Math.floor(this.offset_y / 2);
+                row_offset = Math.floor(this.period_y / 2);
                 remaining = root_height;
 
             while (remaining > row_height)
@@ -159,11 +159,11 @@ const GRID = {
     image: document.getElementById('fullImage'),
     initial_image: document.getElementById('initialImage'),
     misorientation: false,
-    x0: 0,  // to do something
-    y0: 0,
+    image_x0: 0,
+    image_y0: 0,
 
     tile_size: 100,
-    tile_shape: SquareTile(100),
+    tile_shape: SquarePattern(100),
 
     resizeTile: function(size) {
         this.tile_size = size;
@@ -171,9 +171,9 @@ const GRID = {
     },
 
     reshapeTiles: function(shape) {
-        if (shape == 'SQUARE') this.tile_shape = SquareTile(this.tile_size);
-        if (shape == 'HEXAGON') this.tile_shape = HexagonTile(this.tile_size);
-        if (shape == 'TRIANGLE') this.tile_shape = TriangleTile(this.tile_size);
+        if (shape == 'SQUARE') this.tile_shape = SquarePattern(this.tile_size);
+        if (shape == 'HEXAGON') this.tile_shape = HexagonPattern(this.tile_size);
+        if (shape == 'TRIANGLE') this.tile_shape = TrianglePattern(this.tile_size);
         this.reCrop();
     },
 
@@ -188,16 +188,16 @@ const GRID = {
 
         w = Math.floor(W * ratio);  h = Math.floor(H * ratio);
         this.tile_size = Math.floor(Math.min(w/2.5, h/2.5));
-        this.tile_shape = HexagonTile(this.tile_size);
+        this.tile_shape = HexagonPattern(this.tile_size);
 
         this.canvas.width = w;      this.canvas.height = h;
         ctx.drawImage(this.initial_image, 0, 0, w, h);        
-        this.x0 = Math.floor((this.root.clientWidth - w) / 2);
-        this.y0 = Math.floor((this.root.clientHeight - h) / 2);
+        this.image_x0 = Math.floor((this.root.clientWidth - w) / 2);
+        this.image_y0 = Math.floor((this.root.clientHeight - h) / 2);
 
         this.image.style.position = 'absolute';
-        this.image.style.left = this.x0 + 'px';
-        this.image.style.top = this.y0 + 'px';
+        this.image.style.left = this.image_x0 + 'px';
+        this.image.style.top = this.image_y0 + 'px';
         this.image.src = this.canvas.toDataURL('image/jpeg');
         // wait for image loading, reCrop on load
     },
@@ -225,14 +225,14 @@ const GRID = {
             ctx.drawImage(this.image, x, y, w, h, 0, 0, w, h);
             imgSrc = this.canvas.toDataURL('image/jpeg');
 
-            x_ = x + this.x0; y_ = y + this.y0;
+            x_ = x + this.image_x0; y_ = y + this.image_y0;
             this.tiles[`${x_}_${y_}`] = TILES.create(x_, y_, imgSrc, clip_path);
             this.root.appendChild(this.tiles[`${x_}_${y_}`])
 
-            x += this.tile_shape.offset_x;
+            x += this.tile_shape.period_x;
             if (x + this.tile_shape.tile_width <= this.image.width) continue;
 
-            x = x0;  y += this.tile_shape.offset_y;
+            x = x0;  y += this.tile_shape.period_y;
             if (y + this.tile_shape.tile_height <= this.image.height) continue;
 
             break;
@@ -240,6 +240,7 @@ const GRID = {
     },
 
     findClose: function(target_x, target_y) {
+        // for proper rotation handling
         let int_x = Math.floor(target_x),
             int_y = Math.floor(target_y),
             tune_x, tune_y, i, j, target;

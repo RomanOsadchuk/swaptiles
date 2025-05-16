@@ -25,7 +25,7 @@ const SWAP = {
         this.shift_x0 = event.clientX;
         this.shift_y0 = event.clientY;
         this.shift_t0 = Date.now();
-        this.main_tile.createDuplicate();
+        this.main_tile.createDuplicate();  // two duplicates are possible
         TILES.getArray('selected').forEach((t) => t.createDuplicate());
     },
 
@@ -102,8 +102,8 @@ const SWAP = {
         let tile, target, vacant_tiles = [], target_tiles = [];
 
         for (tile of TILES.getArray('selected')) {
-            target = this._getTarget(tile);
-            tile.resetShift();  ///////////////////////////// and rotation
+            target = this._getTarget(tile);  // important to get target first
+            tile.resetShift();               // after that do resetShifh
             if (target){
                 target.appendChild(tile.firstChild);
                 target_tiles.push(target);
@@ -123,10 +123,10 @@ const SWAP = {
             if (target.children.length == 2) {
                 tile = vacant_tiles.pop()
                 tile.appendChild(target.firstChild)
-                tile.updateIfInPlace();
+                tile.removeIfInPlace();
             }
             target.classList.add('selected');
-            target.updateIfInPlace();
+            target.removeIfInPlace();
         }
     },
 

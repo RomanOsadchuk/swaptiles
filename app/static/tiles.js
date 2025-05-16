@@ -17,8 +17,6 @@ const TILES = {
         tile.dataset.x0 = x;  // for rotate many
         tile.dataset.y0 = y;
 
-        tile.dataset.x = x;
-        tile.dataset.y = y;
         tile.style.left = x + 'px';
         tile.style.top = y + 'px';
         if (extra_class)
@@ -81,7 +79,7 @@ const TILES = {
 
 
 
-HTMLElement.prototype.updateIfInPlace = function() {
+HTMLElement.prototype.removeIfInPlace = function() {
     _outPhaseTriangeRotation(this);
     let tile_position = this.dataset.x0 + '_' + this.dataset.y0,
         picture_data = this.firstChild.dataset;
@@ -90,20 +88,6 @@ HTMLElement.prototype.updateIfInPlace = function() {
         GRID.tiles[tile_position] = null;
         this.remove();
     }
-};
-
-
-HTMLElement.prototype.shift = function(dx, dy) {
-    this.style.left = Number(this.dataset.x_) + dx + 'px';
-    this.style.top = Number(this.dataset.y_) + dy + 'px';
-};
-
-
-HTMLElement.prototype.deShift = function(dx, dy) {
-    this.style.left = this.dataset.x + 'px';
-    this.style.top = this.dataset.y + 'px';
-    this.firstChild.dataset.rotation = this.dataset.r_ || '0';
-    this.firstChild.style.transform = 'rotate(' + this.dataset.r_ + 'deg)';
 };
 
 
@@ -128,8 +112,6 @@ HTMLElement.prototype.rotateAgainst = function(ref_tile, coef) {
 
     this.dataset.x = Math.floor(x_ref + rm[0][0] * dx + coef * rm[0][1] * dy);
     this.dataset.y = Math.floor(y_ref + coef * rm[1][0] * dx + rm[1][1] * dy);
-    // this.dataset.x_ = Math.floor(x_ref - coef * dy);
-    // this.dataset.y_ = Math.floor(y_ref + coef * dx);
 };
 
 
@@ -151,7 +133,7 @@ HTMLElement.prototype.rotateDegree = function(deltaDegree, skip_check) {
     picture.dataset.rotation = newDegree;
     picture.style.transform = 'rotate(' + newDegree + 'deg)';
     if (skip_check == true) return;
-    this.updateIfInPlace();
+    this.removeIfInPlace();
 };
 
 
