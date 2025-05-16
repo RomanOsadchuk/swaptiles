@@ -9,7 +9,7 @@ STATIC_DIR = 'static/'
 templates = Jinja2Templates(directory=STATIC_DIR)
 
 
-def _detect_mobile_agent(request):
+def _detectMobile(request):
     for mobile_platform in ('Android', 'iPhone'):
         if mobile_platform in request.headers['user-agent']:
             return True
@@ -23,14 +23,16 @@ async def homepage(request):
 
 
 async def gallery(request):
-    context = getPainting(request.path_params['gallery'])
+    context = getPainting(request.path_params['gallery'],
+                          mobile=_detectMobile(request))
     context['request'] = request
     return templates.TemplateResponse('painting.html', context=context)
 
 
 async def painting(request):
     context = getPainting(request.path_params['gallery'],
-                          request.path_params['painting'])
+                          request.path_params['painting'],
+                          mobile=_detectMobile(request))
     context['request'] = request
     return templates.TemplateResponse('painting.html', context=context)
 
