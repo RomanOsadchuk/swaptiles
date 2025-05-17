@@ -13,14 +13,13 @@ const TILES = {
 
         tile.classList.add('tile');
         tile.appendChild(picture);
-
-        tile.dataset.x0 = x;  // for rotate many
-        tile.dataset.y0 = y;
-
-        tile.style.left = x + 'px';
-        tile.style.top = y + 'px';
         if (extra_class)
            tile.classList.add(extra_class);
+
+        tile.dataset.x0 = x;
+        tile.dataset.y0 = y;
+        tile.style.left = x + 'px';
+        tile.style.top = y + 'px';
 
         tile.oncontextmenu = (e) => { return false; };
         return tile;
@@ -79,6 +78,41 @@ const TILES = {
 
 
 
+HTMLElement.prototype.select = function() {
+    this.dataset.x = this.dataset.x0;
+    this.dataset.y = this.dataset.y0;
+    this.dataset.apriori_selected = this.classList.contains('selected') ? 'yes' : '';
+    this.classList.add('selected');
+
+    let pic = this.firstChild;
+    pic.dataset.apriori_rotation = pic.dataset.rotation;
+};
+
+
+HTMLElement.prototype.shift = function(dx, dy) {
+    this.style.left = Number(this.dataset.x) + dx + 'px';
+    this.style.top = Number(this.dataset.y) + dy + 'px';
+};
+
+
+HTMLElement.prototype.toggleSelection = function() {
+    if (this.dataset.apriori_selected)
+        this.classList.remove('selected');
+    else this.classList.add('selected');
+};
+
+
+HTMLElement.prototype.resetPosition = function(reset_rotation) {
+    this.style.left = this.dataset.x0 + 'px';
+    this.style.top = this.dataset.y0 + 'px';
+    if (reset_rotation) {
+        let pic = this.firstChild;
+        pic.dataset.rotation = pic.dataset.apriori_rotation;
+        pic.style.transform = 'rotate(' + pic.dataset.rotation + 'deg)';
+    }
+};
+
+
 HTMLElement.prototype.removeIfInPlace = function() {
     _outPhaseTriangeRotation(this);
     let tile_position = this.dataset.x0 + '_' + this.dataset.y0,
@@ -88,14 +122,6 @@ HTMLElement.prototype.removeIfInPlace = function() {
         GRID.tiles[tile_position] = null;
         this.remove();
     }
-};
-
-
-HTMLElement.prototype.resetShift = function() {
-    this.dataset.x = this.dataset.x0;
-    this.dataset.y = this.dataset.y0;
-    this.style.left = this.dataset.x + 'px';
-    this.style.top = this.dataset.y + 'px';  // + rotation
 };
 
 
@@ -151,13 +177,12 @@ HTMLElement.prototype.createDuplicate = function() {
 
 
 function _outPhaseTriangeRotation(tile) {
-    if (GRID.tile_shape.rotation_degree != 120)
-        return;
-    let x_div = Number(tile.dataset.x0),
-        x_img = Number(tile.firstChild.dataset.position.split('_')[0]),
-        rot = Number(tile.firstChild.dataset.rotation),
-        dx_in_phase = (x_div - x_img) % GRID.tile_size == 0,
-        rotation_in_phase = rot % 120 == 0;
-    if (dx_in_phase != rotation_in_phase)
-        tile.rotateDegree(180);
+    if (GRID.tile_shape.name != 'TRIANGLE') return;
+    let true_tile = GRID.tiles[tile.firstChild.dataset.position],
+        path_off_phase = (true_tile.classList.contains('triangle-A-path')
+                          != tile.classList.contains('triangle-A-path')),
+        rotation_off_phase = Number(tile.firstChild.dataset.rotation) % 120 != 0;
+
+    if (path_off_phase != rotation_off_phase)
+        tile.rotateDegree(180, skip_check=true);
 };

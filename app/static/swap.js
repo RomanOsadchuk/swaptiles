@@ -18,14 +18,12 @@ const SWAP = {
         if (!tile) return;
 
         tile.style.pointerEvents = 'none';
+        tile.select();
         this.main_tile = tile;
         this.main_target = tile;
-        this.main_tile.dataset.x = this.main_tile.dataset.x0
-        this.main_tile.dataset.y = this.main_tile.dataset.y0
         this.shift_x0 = event.clientX;
         this.shift_y0 = event.clientY;
         this.shift_t0 = Date.now();
-        this.main_tile.createDuplicate();  // two duplicates are possible
         TILES.getArray('selected').forEach((t) => t.createDuplicate());
     },
 
@@ -33,9 +31,7 @@ const SWAP = {
         if (!this.main_target) return;
         let dx = event.clientX - this.shift_x0,
             dy = event.clientY - this.shift_y0;
-        this.main_tile.style.left = Number(this.main_tile.dataset.x0) + dx + 'px';
-        this.main_tile.style.top = Number(this.main_tile.dataset.y0) + dy + 'px';
-        this._shiftSelected(dx, dy);
+        TILES.getArray('selected').forEach((t) => t.shift(dx, dy));
         
         if (!this._shortTap()) {
             target = this._tileFromEvent(event);
@@ -46,36 +42,19 @@ const SWAP = {
 
     stopShift: function() {
         if (!this.main_target) return;
-        this.main_tile.style.left = this.main_tile.dataset.x + 'px';
-        this.main_tile.style.top = this.main_tile.dataset.y + 'px';
 
-        if (this._shortTap()) this._toggleMainTileSelection();
-        if (this.main_tile != this.main_target) this._swapSelected();  // swap changes selection
-        else TILES.getArray('selected').forEach((t) => t.resetShift());
+        if (this.main_tile != this.main_target || this.angle != 0) this._swapSelected();  // swap changes selection
+        else TILES.getArray('selected').forEach((t) => t.resetPosition(reset_rotation=true));
 
-        if (!this._shortTap() && TILES.getArray('selected').length == 1)
+        if (this._shortTap()) this.main_tile.toggleSelection();
+        else if (TILES.getArray('selected').length == 1)
             TILES.removeClassFromTiles('selected');
+        
         TILES.removeClassFromTiles('target');
         TILES.getArray('duplicate').forEach((t) => { t.remove() });
-
         this.main_target = null;
         this.main_tile.style.pointerEvents = '';
-        this.shift_t0 = 0;
-    },
-
-    _toggleMainTileSelection: function(tile) {
-        if (!this.main_tile.classList.contains('selected'))
-            this.main_tile.classList.add('selected');
-        else this.main_tile.classList.remove('selected');
-    },
-
-    _shiftSelected: function(dx, dy) { 
-        if (!this._shortTap())
-            this.main_tile.classList.add('selected');
-        for (tile of TILES.getArray('selected')) {
-            tile.style.left = Number(tile.dataset.x) + dx + 'px';
-            tile.style.top = Number(tile.dataset.y) + dy + 'px';
-        }
+        this.angle = 0;
     },
 
     _resetTargets: function(new_target) {
@@ -103,12 +82,13 @@ const SWAP = {
 
         for (tile of TILES.getArray('selected')) {
             target = this._getTarget(tile);  // important to get target first
-            tile.resetShift();               // after that do resetShifh
             if (target){
+                tile.resetPosition(reset_rotation=false);  // after do resetting position
                 target.appendChild(tile.firstChild);
                 target_tiles.push(target);
             }
             else {
+                tile.resetPosition(reset_rotation=true);
                 tile.classList.remove('selected');
             }
         }
@@ -125,7 +105,7 @@ const SWAP = {
                 tile.appendChild(target.firstChild)
                 tile.removeIfInPlace();
             }
-            target.classList.add('selected');
+            target.select();
             target.removeIfInPlace();
         }
     },
