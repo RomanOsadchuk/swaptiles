@@ -16,8 +16,11 @@ def _detectMobile(request):
     return False
 
 
+async def alapolok(request):
+    return templates.TemplateResponse('alapolok/page.html', context={'request': request})
+
+
 async def homepage(request):
-    # galleries = MOBILE if _detect_mobile_agent(request) else GALLERIES.keys()
     context = {'request': request, 'galleries': getGalleries()}
     return templates.TemplateResponse('homepage.html', context=context)
 
@@ -40,6 +43,7 @@ async def painting(request):
 app = Starlette(debug=True, routes=[
     Mount('/static', StaticFiles(directory=STATIC_DIR), name='static'),
     Route('/', homepage),
+    Route('/alapolok', alapolok),
     Route('/{gallery:str}', gallery),
     Route('/{gallery:str}/{painting:str}', painting),
 ])

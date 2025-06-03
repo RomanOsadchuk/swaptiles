@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <title>Swap Tiles - {{ title }}</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/painting.css">
+</head>
+
+<body>
+    <div class="button-array">
+        <div class="start-buttons">
+            <a href="/" class="btn home-path"></a>
+            <a href="{{ next }}" class="btn next-path"></a>
+        </div>
+        <div class="center-buttons">
+            <label class="btn romb-path" for="fileInput">...</label>
+            <button id="shapeBtn" class="btn hex-button"></button>
+        </div>
+        <div>
+            <button id="aboutBtn" class="btn romb-path">?</button>
+        </div>
+    </div>
+
+  <main>
+    <div class="button-array" id="subMenu" style="display: none;">
+        <div class="center-buttons">
+            <button id="rotationBtn" class="btn circle-path"></button>
+            <button id="plusSize" class="btn romb-path">+</button>
+            <button id="minusSize" class="btn romb-path">-</button>
+            <button id="triangleBtn" class="btn tre-button"></button>
+            <button id="hexagonBtn" class="btn hex-button"></button>
+            <button id="squareBtn" class="btn"></button>
+        </div>
+    </div>
+
+    <div id="about", style="display: none;">
+        <h1>{{ title }}</h1>
+        <h2>by {{ author }}, {{ year }}</h2>
+    </div>
+
+    <div id="content">
+        <p id="message">Drag Tiles to Swap</p>
+        <div id="mosaic"><img id="fullImage"></img></div>
+    </div>
+
+    <img id="initialImage" src="/static/paintings/{{ gallery }}/{{ slug }}.jpg" style="display: none;"></img>
+    <canvas id="canvas" style="display: none;"></canvas>
+    <input id="fileInput" type="file" accept="image/*" style="display: none;"/>
+  </main>
+
+    <script src="/static/shapes.js"></script>
+    <script src="/static/tiles.js?version=2"></script>
+    <script src="/static/swap.js?version=2"></script>
+    <script src="/static/interactions.js"></script>
+</body>
+</html>
