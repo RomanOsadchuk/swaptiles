@@ -5,27 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Swap Tiles</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <link rel="stylesheet" href="/static/homepage.css">
+    <link rel="stylesheet" href="/static/homepage.css?v=2">
 </head>
 
 <body>
-    <header><h1>Swap Tiles</h1></header>
-    <main>
+    <div id="title"></div>
+    <div id="galleries" class="grid vertical">
         {% for gallery in galleries %}
-            <div class="gallery">
-                <a href="/{{ gallery }}">
-                    <img src="/static/paintings/{{ gallery }}/_thumbnail.jpg">
-                    <div class="gallery-name">{{ gallery.replace('-', ' ').title() }}</div>
-                </a>
-            </div>
+        <a href="/{{ gallery }}">
+            <div><img src="/static/paintings/{{ gallery }}/_thumbnail.jpg?v=2"/></div>
+        </a>
         {% endfor %}
-    </main>
+    </div>
+    <div style="display: none;">
+        <canvas id="canvas"/>
+    </div>
 
-    <footer>
+    <!--footer>
         <p>All artworks are public domain in the EU</p>
         <p>© <a target="_blank" href="https://github.com/RomanOsadchuk/swaptiles">minimalist design</a> by Roman Osadchuk</p>
         <p>russia is a terrorist state</p>
-    </footer>
+    </footer-->
+
+    <script src="/static/drawer.js"></script>
+    <script src="/static/tile.js"></script>
+    <script src="/static/swapper.js"></script>
+    <script src="/static/grid.js"></script>
+    <script src="/static/homepage.js"></script>
 </body>
 </html>
 

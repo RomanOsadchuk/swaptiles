@@ -10,6 +10,10 @@ body {
     flex-direction: column;
 }
 
+#actions {
+    z-index: 5;
+}
+
 #puzzle {
     position: relative;
     flex: 1;
@@ -44,8 +48,9 @@ body {
 
 @keyframes shake {
     0% { transform: translateX(0); }
-    25% { transform: translateX(-2px); }
-    50% { transform: translateX(2px); }
-    75% { transform: translateX(-2px); }
+    20% { transform: translateX(-2px); }
+    40% { transform: translateX(2px); }
+    60% { transform: translateX(-1px); }
+    80% { transform: translateX(-1px); }
     100% { transform: translateX(0); }
 }

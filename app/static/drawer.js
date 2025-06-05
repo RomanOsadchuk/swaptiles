@@ -1,11 +1,11 @@
 const ROOT_3 = Math.sqrt(3),
       CANVAS = document.getElementById('canvas');
-      CTX = CANVAS.getContext('2d');
+      CTX = CANVAS.getContext('2d', { alpha: true });
 
 
 class Drawer {
-    canvas = document.getElementById('canvas');  size;  x0;  y0;
-    ctx = document.getElementById('canvas').getContext('2d');
+    // canvas = document.getElementById('canvas');  size;  x0;  y0;
+    // ctx = document.getElementById('canvas').getContext('2d');
 
     constructor(size, vertical) {
         let width = size, height = size;
@@ -13,8 +13,8 @@ class Drawer {
         else width = Math.round(size * 2 / ROOT_3);
 
         this.size = size;
-        this.canvas.width = width;
-        this.canvas.height = height;
+        CANVAS.width = width;
+        CANVAS.height = height;
         this.x0 = width / 2;
         this.y0 = height / 2;
     }
@@ -23,88 +23,102 @@ class Drawer {
     quarter() { return this.half() / 2; }
     eights() { return this.quarter() / 2; }
 
-    drawHome() {
-        this.ctx.moveTo(this.x0, this.y0 - this.half());
-        this.ctx.lineTo(this.x0 + this.half(), this.y0 + this.quarter());
-        this.ctx.lineTo(this.x0 + this.quarter(), this.y0 + this.quarter());
-        this.ctx.lineTo(this.x0 + this.quarter(), this.y0 + this.half());
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 + this.half());
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 + this.quarter());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 + this.quarter());
+    _drawHome() {
+        CTX.moveTo(this.x0, this.y0 - this.half());
+        CTX.lineTo(this.x0 + this.half(), this.y0 + this.quarter());
+        CTX.lineTo(this.x0 + this.quarter(), this.y0 + this.quarter());
+        CTX.lineTo(this.x0 + this.quarter(), this.y0 + this.half());
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 + this.half());
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 + this.quarter());
+        CTX.lineTo(this.x0 - this.half(), this.y0 + this.quarter());
     }
 
-    drawNext() {
-        this.ctx.moveTo(this.x0 + this.half(), this.y0);
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 + this.half());
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 + this.quarter());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 + this.quarter());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 - this.quarter());
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 - this.quarter());
-        this.ctx.lineTo(this.x0 - this.quarter(), this.y0 - this.half());
+    _drawNext() {
+        CTX.moveTo(this.x0 + this.half(), this.y0);
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 + this.half());
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 + this.quarter());
+        CTX.lineTo(this.x0 - this.half(), this.y0 + this.quarter());
+        CTX.lineTo(this.x0 - this.half(), this.y0 - this.quarter());
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 - this.quarter());
+        CTX.lineTo(this.x0 - this.quarter(), this.y0 - this.half());
     }
 
-    drawPlus() {
-        this.ctx.moveTo(this.x0 + this.half(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 + this.eights(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 + this.eights(), this.y0 + this.half());
-        this.ctx.lineTo(this.x0 - this.eights(), this.y0 + this.half());
-        this.ctx.lineTo(this.x0 - this.eights(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 - this.eights());
-        this.ctx.lineTo(this.x0 - this.eights(), this.y0 - this.eights());
-        this.ctx.lineTo(this.x0 - this.eights(), this.y0 - this.half());
-        this.ctx.lineTo(this.x0 + this.eights(), this.y0 - this.half());
-        this.ctx.lineTo(this.x0 + this.eights(), this.y0 - this.eights());
-        this.ctx.lineTo(this.x0 + this.half(), this.y0 - this.eights());
+    _drawPlus() {
+        CTX.moveTo(this.x0 + this.half(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 + this.eights(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 + this.eights(), this.y0 + this.half());
+        CTX.lineTo(this.x0 - this.eights(), this.y0 + this.half());
+        CTX.lineTo(this.x0 - this.eights(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 - this.half(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 - this.half(), this.y0 - this.eights());
+        CTX.lineTo(this.x0 - this.eights(), this.y0 - this.eights());
+        CTX.lineTo(this.x0 - this.eights(), this.y0 - this.half());
+        CTX.lineTo(this.x0 + this.eights(), this.y0 - this.half());
+        CTX.lineTo(this.x0 + this.eights(), this.y0 - this.eights());
+        CTX.lineTo(this.x0 + this.half(), this.y0 - this.eights());
     }
 
-    drawMinus() {
-        this.ctx.moveTo(this.x0 + this.half(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 + this.eights());
-        this.ctx.lineTo(this.x0 - this.half(), this.y0 - this.eights());
-        this.ctx.lineTo(this.x0 + this.half(), this.y0 - this.eights());
+    _drawMinus() {
+        CTX.moveTo(this.x0 + this.half(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 - this.half(), this.y0 + this.eights());
+        CTX.lineTo(this.x0 - this.half(), this.y0 - this.eights());
+        CTX.lineTo(this.x0 + this.half(), this.y0 - this.eights());
     }
 
-    drawCircle() {
-        this.ctx.arc(this.x0, this.y0, 3*this.eights(), 0, 2*Math.PI);
+    _drawCircle() {
+        CTX.arc(this.x0, this.y0, 3*this.eights(), 0, 2*Math.PI);
     }
 
-    drawInfo() {
-        this.ctx.arc(this.x0, this.y0, this.eights(), 0, 2*Math.PI);
-        this.ctx.fill();  this.ctx.beginPath();
-        this.ctx.arc(this.x0, this.y0 - 3*this.eights(), this.eights(), 0, 2*Math.PI);
-        this.ctx.fill();  this.ctx.beginPath();
-        this.ctx.arc(this.x0, this.y0 + 3*this.eights(), this.eights(), 0, 2*Math.PI);
+    _drawInfo() {
+        CTX.arc(this.x0, this.y0, this.eights(), 0, 2*Math.PI);
+        CTX.fill();  CTX.beginPath();
+        CTX.arc(this.x0, this.y0 - 3*this.eights(), this.eights(), 0, 2*Math.PI);
+        CTX.fill();  CTX.beginPath();
+        CTX.arc(this.x0, this.y0 + 3*this.eights(), this.eights(), 0, 2*Math.PI);
     }
 
-    drawUpload() {
-        this.ctx.arc(this.x0, this.y0, this.eights(), 0, 2*Math.PI);
-        this.ctx.fill();  this.ctx.beginPath();
-        this.ctx.arc(this.x0 - 3*this.eights(), this.y0, this.eights(), 0, 2*Math.PI);
-        this.ctx.fill();  this.ctx.beginPath();
-        this.ctx.arc(this.x0 + 3*this.eights(), this.y0, this.eights(), 0, 2*Math.PI);
+    _drawUpload() {
+        CTX.arc(this.x0, this.y0, this.eights(), 0, 2*Math.PI);
+        CTX.fill();  CTX.beginPath();
+        CTX.arc(this.x0 - 3*this.eights(), this.y0, this.eights(), 0, 2*Math.PI);
+        CTX.fill();  CTX.beginPath();
+        CTX.arc(this.x0 + 3*this.eights(), this.y0, this.eights(), 0, 2*Math.PI);
+    }
+
+    _backGround() {
+        CTX.beginPath();
+        CTX.rect(0, 0, CANVAS.width, CANVAS.height);
+        CTX.fillStyle = 'Silver';
+        CTX.fill();
     }
 
     draw(action) {
-        this.ctx.beginPath();
-        this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = 'Silver';
-        this.ctx.fill();
-        //['HOME', 'MINUS', 'NEXT', 'ROTATE', 'IMAGE', 'PLUS', 'INFO']
-        this.ctx.fillStyle = 'Indigo';
-        this.ctx.beginPath();
+        this._backGround();
+        CTX.fillStyle = 'Indigo';
+        CTX.beginPath();
 
-        if (action == 'HOME') this.drawHome();
-        if (action == 'NEXT') this.drawNext();
-        if (action == 'PLUS') this.drawPlus();
-        if (action == 'MINUS') this.drawMinus();
-        if (action == 'ROTATE') this.drawCircle();
-        if (action == 'IMAGE') this.drawUpload();
-        if (action == 'INFO') this.drawInfo();
+        if (action == 'HOME') this._drawHome();
+        if (action == 'NEXT') this._drawNext();
+        if (action == 'PLUS') this._drawPlus();
+        if (action == 'MINUS') this._drawMinus();
+        if (action == 'ROTATE') this._drawCircle();
+        if (action == 'IMAGE') this._drawUpload();
+        if (action == 'INFO') this._drawInfo();
 
-        this.ctx.closePath();
-        this.ctx.fill();
-        return this.canvas.toDataURL('image/jpeg');
+        CTX.closePath();
+        CTX.fill();
+        return CANVAS.toDataURL('image/jpeg');
+    }
+
+    drawChar(char) {
+        this._backGround();
+        CTX.fillStyle = 'Indigo';
+        CTX.font = 'bold 50px Verdana';
+
+        let width = CTX.measureText(char).width;
+        // console.log(dims.width, dims.height);
+        CTX.fillText(char, this.x0 - width/2, this.y0 + 20);
+        return CANVAS.toDataURL('image/jpeg');
     }
 }
  
