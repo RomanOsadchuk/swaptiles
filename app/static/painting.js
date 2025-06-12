@@ -1,17 +1,17 @@
 
 
-let puzzle = new Grid('puzzle'),
-    menu = new Grid('actions', puzzle),
+let grid = new Grid(document.body),
     big_picture = document.getElementById('bigPicture');
-menu.fitMenu(['HOME', 'NEXT', 'PLUS', 'ROTATE', 'MINUS', 'IMAGE', 'INFO'], puzzle);
-window.onload = () => { puzzle.fitPicture(big_picture); };
+
+grid.fitMenu();
+window.onload = () => { grid.fitPicture(big_picture); };
 
 
 FILE_INPUT.onchange = () => {
     let file = FILE_INPUT.files[0],
         reader = new FileReader();
 
-    big_picture.onload = () => { puzzle.fitPicture(big_picture); };
+    big_picture.onload = () => { grid.fitPicture(big_picture); };
     reader.onload = (e) => { big_picture.src = e.target.result; };
 
     if (file) reader.readAsDataURL(file);
@@ -21,6 +21,6 @@ FILE_INPUT.onchange = () => {
 
 
 window.onresize = () => {
-	menu.fitMenu(['HOME', 'NEXT', 'PLUS', 'ROTATE', 'MINUS', 'IMAGE', 'INFO'], puzzle);
-	puzzle.fitPicture(big_picture); 
+	grid.fitMenu();
+	grid.fitPicture(big_picture); 
 };

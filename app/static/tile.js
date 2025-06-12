@@ -1,16 +1,20 @@
 
 
 class Tile {
-    el; x0; y0; x; y; action;
+    el; true_x; true_y; grid_x; grid_y; x; y; angle; action;
 
     constructor(x, y, image_src, action) {
-        this.x0 = x;  this.x = x;
-        this.y0 = y;  this.y = y;
+        this.true_x = x;  this.grid_x = x;  this.x = x;
+        this.true_y = y; this.grid_y = y;  this.y = y;
         this.action = action || null;
-        this.el = document.createElement('div');
+        this.angle = 0;
+
+        this.el = document.createElement('img');
+        this.el.src = image_src;
         this.el.style.left = x + 'px';
         this.el.style.top = y + 'px';
-        this.el.appendChild(this.createImage(x, y, image_src, action));
+        if (action) this.el.classList.add('btn');
+        else this.el.classList.add('piece');
 
         this.el.oncontextmenu = (e) => { return false; };
         this.el.onmousedown = (e) => { this.touch(e); };
@@ -21,45 +25,44 @@ class Tile {
         this.el.addEventListener("touchend", (e) => { this.release(e); });
     }
 
-    createImage(x, y, image_src, action) {
-        let pic = document.createElement('img');
-        pic.src = image_src;
-        pic.dataset.position = x+'|'+y;
-        pic.dataset.rotation = '0';
-        if (action) pic.dataset.action = action;
-        return pic;
+    putInto(x, y) {
+        this.grid_x = x;  this.x = x;
+        this.grid_y = y;  this.y = y;
+        this.el.style.left = x + 'px';
+        this.el.style.top = y + 'px';
+        this.pre_touch_angle = this.angle;
     }
 
-    _getAction() { return this.el.firstChild.dataset.action || null; }
+    isSelected() { return this.el.classList.contains('selected'); }
+    isFixed() { return this.grid_x == this.true_x && this.grid_y == this.true_y && this.angle == 0; }
+    _isPiece() { return this.el.classList.contains('piece'); }
 
-    t0; apriori_selected; apriori_rotation;
+    touch_time; pre_touch_selected; pre_touch_angle;
 
     touch(event) {
         if (event && event.touches && event.touches.length > 1) return;
         if (event) event.preventDefault();
-        if (this.el.classList.contains('fixed')) {
-            this._shake();
-            return;
+        if (this.isFixed() && this._isPiece()) {
+            return this._shake();
         }
 
-        this.t0 = Date.now();
-        this.x = this.x0;  this.y = this.y0;
-        this.apriori_selected = this.el.classList.contains('selected');
-        this.apriori_rotation = Number(this.el.firstChild.dataset.rotation);
+        this.touch_time = Date.now();
+        this.x = this.grid_x;  this.y = this.grid_y;
+        this.pre_touch_selected = this.isSelected();
+        this.pre_touch_angle = this.angle;
         this.el.classList.add('selected');
+        event.action = this.action;
     }
 
     release(event) {
         if (event && event.touches && event.touches.length > 0) return;
         this.shift(0, 0);
-        if (Date.now() - this.t0 > 300) return;
+        if (this.action) this.el.classList.remove('selected');
+        if (Date.now() - this.touch_time > 300) return;
 
-        if (this.apriori_selected)
-            this.el.classList.remove('selected');
-        else this.el.classList.add('selected');
+        if (this.pre_touch_selected) this.el.classList.remove('selected');
         event.quick_tap = true;
-        event.action = this.el.firstChild.dataset.action;
-        if (event.action) this.el.classList.remove('selected');
+        event.action = this.action;
     }
 
     shift(dx, dy) {
@@ -67,65 +70,56 @@ class Tile {
         this.el.style.top = this.y + dy + 'px';
     }
 
-    fixIfInPlace() {
-        if (this._inPlace()) this.el.classList.add('fixed');
+    resetPosition() {
+        this.el.classList.remove('selected');
+        this.el.style.left = this.grid_x + 'px';
+        this.el.style.top = this.grid_y + 'px';
+        this._setAngle(this.pre_touch_angle);
     }
 
-    _inPlace() {
-        let ds = this.el.firstChild.dataset;
-        return (ds.position == this.x0+'|'+this.y0) && (ds.rotation == '0');
-    }
-
-    resetPosition(reset_rotation) {
-        this.el.style.left = this.x0 + 'px';
-        this.el.style.top = this.y0 + 'px';
-        if (reset_rotation) {
-            let pic = this.el.firstChild;
-            pic.dataset.rotation = this.apriori_rotation;
-            pic.style.transform = 'rotate(' + this.apriori_rotation + 'deg)';
-        }
-    }
-
-    _shake() {
-        this.el.classList.remove('shaking');
-        void this.el.offsetWidth;
-        this.el.classList.add('shaking');
+    _setAngle(angle) {
+        this.angle = (angle + 360) % 360;
+        this.el.style.transform = 'rotate(' + angle + 'deg)';
     }
 
     rotateWheel(event) {
         event.preventDefault();
-        if (this.el.classList.contains('fixed')) {
-            this._shake();
-            return;
-        }
-        let delta = event.deltaY > 0 ? 60 : -60;
-
-        this._setRotation(this._getRotation() + delta);
-        this.fixIfInPlace();
+        if (this.isFixed() && this._isPiece()) return this._shake();
+        this._setAngle(this.angle + (event.deltaY > 0 ? 60 : -60));
+        if (this.isFixed() && this._isPiece()) return this._shake();
     }
 
     rotateRandom() {
-        let degree = [0, 60, 120, 180, 240, 300][Math.floor(Math.random() * 6)];
-        this._setRotation(degree);
-    }
-
-    _getRotation() { return Number(this.el.firstChild.dataset.rotation); }
-
-    _setRotation(degree) {
-        let ds = this.el.firstChild.dataset;
-        ds.rotation = (degree + 360) % 360;
-        this.el.firstChild.style.transform = 'rotate(' + ds.rotation + 'deg)';
+        let rand = Math.floor(Math.random() * 6);
+        this._setAngle([0, 60, 120, 180, 240, 300][rand]);
     }
 
     rotateAgainst(ref_tile, degree) {
-        this._setRotation(this.apriori_rotation + degree);
+        this._setAngle(this.pre_touch_angle + degree);
         if (this == ref_tile) return;
 
         let rad = (degree / 180 * Math.PI),
-            dx = this.x0 - ref_tile.x0,
-            dy = this.y0 - ref_tile.y0;
+            dx = this.grid_x - ref_tile.grid_x,
+            dy = this.grid_y - ref_tile.grid_y;
 
-        this.x = Math.round(ref_tile.x0 + Math.cos(rad) * dx - Math.sin(rad) * dy);
-        this.y = Math.round(ref_tile.y0 + Math.sin(rad) * dx + Math.cos(rad) * dy);
+        this.x = Math.round(ref_tile.grid_x + Math.cos(rad) * dx - Math.sin(rad) * dy);
+        this.y = Math.round(ref_tile.grid_y + Math.sin(rad) * dx + Math.cos(rad) * dy);
+    }
+
+    _shake(options) {
+        this.el.classList.remove('selected');
+        if (options == undefined)
+            options = [[3, 0], [-3, 0], [1, 2], [1, -2], [-1, 2], [-1, -2]];
+
+        if (options.length == 0) {
+            this.el.style.left = this.grid_x + 'px';
+            this.el.style.top = this.grid_y + 'px';
+        } else {
+            let rand = Math.floor(Math.random() * options.length),
+                [dx, dy] = options.splice(rand, 1)[0];
+            this.el.style.left = this.grid_x + dx + 'px';
+            this.el.style.top = this.grid_y + dy + 'px';
+            setTimeout(() => { this._shake(options); }, 50)
+        }
     }
 }

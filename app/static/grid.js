@@ -1,76 +1,61 @@
 
-function inCircle() {
-    let size = Math.min(CANVAS.width, CANVAS.height);
-    CTX.fillStyle = 'White';  // figure out transparency & clearRect
-    CTX.fillRect(0, 0, CANVAS.width, CANVAS.height);
-    CTX.beginPath();
-    CTX.arc(CANVAS.width/2, CANVAS.height/2, size*0.55, 0, Math.PI * 2);
-    CTX.closePath();
-    CTX.clip();
-}
-
-
 
 class Grid {
-    el; vertical; size; fix = true; count = 3; rotation = false; tiles = {};
+    el; size; count = 4; tiles = {};
 
     _size2() { return Math.floor(this.size * 2 / ROOT_3); }
     _offset() { return Math.ceil(this.size * ROOT_3 / 2); }
     _quarter() { return this._size2() - this._offset(); }
 
-    constructor(elenemt_id, puzzle) {
-        this.el = document.getElementById(elenemt_id);
-        this.el.classList.add('grid');
-        this.swapper = new Swapper(this, puzzle);
+    constructor(elenemt_) {
+        this.el = elenemt_;
+        new Swapper(this);
     }
 
-    _orient() {
-        this.vertical = window.innerHeight >= window.innerWidth;
-        if (this.vertical) {
-            this.el.style.width = Math.floor(window.innerWidth) + 'px';
-            this.el.classList.remove('horizontal');
-            this.el.classList.add('vertical');
-        } else {
-            this.el.style.height = Math.floor(window.innerHeight) + 'px';
-            this.el.classList.remove('vertical');
-            this.el.classList.add('horizontal');
+    _removeTiles(class_name) {
+        let tile, pos;
+        for (let tile of this.tileArray(class_name)) {
+            tile.el.remove();
+            pos = tile.grid_x + '|' + tile.grid_y;
+            delete this.tiles[pos];
         }
     }
 
     fitMenu(actions) {
-        this._removeAllTiles();
-        this.fix = false;
-        this._orient();
-        let d = this.vertical ? window.innerWidth : window.innerHeight, x = 0, y = 0;
-        this.size = Math.floor(d / actions.length);
+        this._removeTiles();
 
-        if (this.size > 100) {
-            this.size = 100;
-            if (this.vertical) x = Math.floor((d - 100*actions.length) / 2);
-            else y = Math.floor((d - 100*actions.length) / 2);
+        let btn_size = Math.floor(window.innerWidth / 7);
+        if (btn_size > 90) btn_size = 90;
+        let drawer = new Drawer(btn_size, true), x = 10, y = 10;
+
+        for (let action of ['HOME', 'NEXT']) {
+            this.createTile(x, y, drawer.draw(action), action);
+            x += btn_size;
         }
 
-        if (this.vertical)
-            this.el.style.height = this._size2() + 'px';
-        else this.el.style.width = this._size2() + 'px';
-
-        let drawer = new Drawer(this.size - 1, this.vertical);
-        for (let action of actions) {
+        x = window.innerWidth - 10 - 2 * btn_size;
+        for (let action of ['IMAGE', 'INFO']) {
             this.createTile(x, y, drawer.draw(action), action);
-            if (this.vertical) x += this.size;
-            else y += this.size;
+            x += btn_size;
+        }
+
+        y = window.innerHeight - 10 - Math.round(btn_size * 2 / ROOT_3);
+        x = Math.floor(window.innerWidth / 2 - 1.5 * btn_size);
+        for (let action of ['MINUS', 'ROTATE', 'PLUS']) {
+            this.createTile(x, y, drawer.draw(action), action);
+            x += btn_size;
         }
     }
 
     fitPicture(big_picture) {
-        this._orient();
-
         let fitted_picture = document.getElementById('fittedPicture'),
-            w = Math.floor(this.el.clientWidth),
-            h = Math.floor(this.el.clientHeight),
+            w = Math.floor(window.innerWidth),
+            h = Math.floor(window.innerHeight),
             W = big_picture.width,
             H = big_picture.height,
             ratio = Math.min(w/W, h/H);
+
+        if (H > W) this.count = 2;
 
         w = Math.floor(W * ratio);  h = Math.floor(H * ratio);
         CANVAS.width = w;           CANVAS.height = h;
@@ -80,118 +65,54 @@ class Grid {
         fitted_picture.src = CANVAS.toDataURL('image/jpeg');
     }
 
-    _cropOld(picture) {
-        this._removeAllTiles();
-        let x = 0, y = 0, w, h, x0, y0, odd = true;
-        if (this.vertical) {
-            this.size = Math.floor(picture.width / this.count / 2) * 2;
-            w = this.size;  h = this._size2();
-        } else {
-            this.size = Math.floor(picture.height / this.count / 2) * 2;
-            w = this._size2();  h = this.size;
-        }
-
-        x0 = Math.round((this.el.clientWidth - picture.width) / 2);
-        y0 = Math.round((this.el.clientHeight - picture.height) / 2);
-        CANVAS.width = w - 1;  CANVAS.height = h - 1;
-
-        // inCircle();
-        while (true) {
-            CTX.drawImage(picture, x, y, w - 1, h - 1, 0, 0, w - 1, h - 1);
-            this.createTile(x + x0, y + y0, CANVAS.toDataURL('image/jpeg'));
-
-            if (this.vertical) {
-                x += w;
-                if (x+w > picture.width) {
-                    x = odd ? this.size/2 : 0;
-                    y += this._offset();  odd = !odd;
-                    if (y+h >= picture.height) break;
-                }
-            } else { 
-                y += h;
-                if (y+h > picture.height) {
-                    y = odd ? this.size/2 : 0;
-                    x += this._offset();  odd = !odd;
-                    if (x+w >= picture.width) break;
-                }
-            }
-        }
-        // CTX.restore();
-        this._shuffle();
-    }
-
     _crop(picture) {
-        this._removeAllTiles();
-        let x, y, w, h, odd = true,
-            pic_x = Math.round((this.el.clientWidth - picture.width) / 2),
-            pic_y = Math.round((this.el.clientHeight - picture.height) / 2);
+        this._removeTiles('piece');
 
-        if (this.vertical) {
-            this.size = Math.floor(picture.width / this.count / 2) * 2;
-            w = this.size;  h = this._size2();
-            x = -this.size / 2;  y = -this._marg2(picture.height);
-        } else {
-            this.size = Math.floor(picture.height / this.count / 2) * 2;
-            w = this._size2();  h = this.size;
-            x = -this._marg2(picture.width);  y = -this.size / 2;
-        }
-        CANVAS.width = w - 1;  CANVAS.height = h - 1;
+        this.size = Math.floor(picture.width / this.count / 2) * 2;
+        let w = this.size,  h = this._size2(),  odd = true,
+            x = -this.size / 2,  y = -this._marg2(picture.height),
+            pic_x = Math.round((window.innerWidth - picture.width) / 2),
+            pic_y = Math.round((window.innerHeight - picture.height) / 2);
+        CANVAS.width = w;  CANVAS.height = h;
 
         CTX.fillStyle = 'White';
         while (true) {
-            CTX.fillRect(0, 0, w - 1, h - 1);
-            CTX.drawImage(picture, x, y, w - 1, h - 1, 0, 0, w - 1, h - 1);
+            CTX.fillRect(0, 0, w, h);
+            CTX.drawImage(picture, x, y, w, h, 0, 0, w, h);
             this.createTile(x + pic_x, y + pic_y, CANVAS.toDataURL('image/jpeg'));
 
-            if (this.vertical) {
-                x += w;
-                if (x+w > picture.width + this.size / 2) {
-                    x = odd ? 0 : -this.size/2;
-                    y += this._offset();  odd = !odd;
-                    if (y >= picture.height) break;
-                }
-            } else { 
-                y += h;
-                if (y+h > picture.height + this.size / 2) {
-                    y = odd ? 0 : -this.size/2;
-                    x += this._offset();  odd = !odd;
-                    if (x >= picture.width) break;
-                }
+            x += w;
+            if (x+w > picture.width + this.size / 2) {
+                x = odd ? 0 : -this.size/2;
+                y += this._offset();  odd = !odd;
+                if (y >= picture.height) break;
             }
         }
         this._shuffle();
     }
 
-    _removeAllTiles() {
-        for (let tile of this.tileArray())
-            tile.el.remove();
-        this.tiles = {}
-    }
-
     _shuffle() {
-        let tiles = this.tileArray(),
-            next_tile, random_index,
-            current_tile = tiles.splice(0, 1)[0];
+        let tiles = this.tileArray('piece'), next_tile, random_index,
+            current_tile = tiles.splice(0, 1)[0],
+            first_x = current_tile.x, first_y = current_tile.y;
 
         while (tiles.length > 0) {
             random_index = Math.floor(Math.random() * tiles.length);
             next_tile = tiles.splice(random_index, 1)[0];
-            current_tile.el.appendChild(next_tile.el.firstChild);
-            next_tile.el.appendChild(current_tile.el.firstChild);
-            // if (this.rotation) current_tile.rotateRandom();
+            this.putInto(current_tile, next_tile.x, next_tile.y);
+            current_tile.putInto(next_tile.x, next_tile.y);
             current_tile = next_tile;
         }
+        this.putInto(next_tile, first_x, first_y);
     }
 
     fitTitle() {
-        this.fix = false;
-        this.vertical = true;
         this.size = 70;
         this.el.classList.add('vertical');
         this.el.style.height = '150px';
-        let drawer = new Drawer(this.size - 1, this.vertical);
+        let drawer = new Drawer(this.size, true);
 
-        let x = 35, y = 0, letter;
+        let x = 35, y = 0, letter, tile;
         for (letter of ['S', 'W', 'A', 'P']) {
             this.createTile(x, y, drawer.drawChar(letter));
             x += this.size;
@@ -202,6 +123,9 @@ class Grid {
             this.createTile(x, y, drawer.drawChar(letter));
             x += this.size;
         }
+
+        for (tile of this.tileArray())
+            { tile.true_x = -1; tile.true_y = -1; }
     }
 
     fitGalleries() {
@@ -244,10 +168,10 @@ class Grid {
     }
 
     _fitLinkElement(link_el, x, y) {
-        let pic = link_el.children[0].firstChild;
-        pic.style.width = (this.size - 1) + 'px';
-        link_el.children[0].style.left = x + 'px';
-        link_el.children[0].style.top = y + 'px';
+        let pic = link_el.children[0];
+        pic.style.width = this.size + 'px';
+        pic.style.left = x + 'px';
+        pic.style.top = y + 'px';
     }
 
     decCount() {
@@ -263,9 +187,8 @@ class Grid {
     }
 
     rotateRandom() {
-        for (let tile of this.tileArray())
-            if (!tile.el.classList.contains('fixed'))
-                tile.rotateRandom();
+        for (let tile of this.tileArray('piece'))
+            if (!tile.isFixed()) tile.rotateRandom();
     }
 
     createTile(x, y, image_src, action) {
@@ -274,26 +197,27 @@ class Grid {
         this.tiles[x+'|'+y] = tile;
     }
 
+    putInto(tile, x, y) {
+        tile.putInto(x, y);
+        this.tiles[x+'|'+y] = tile;
+        if (tile.isFixed()) tile._shake();
+    }
+
     tileArray(class_name) {
         let result = [];
-        for (let tile of Object.values(this.tiles)){
-            if (!tile) continue;
+        
+        for (let tile of Object.values(this.tiles))
             if (!class_name || tile.el.classList.contains(class_name))
                 result.push(tile);
-        }
         return result;
     }
 
     snap(dx, dy) {
-        let a = this.vertical ? dx : dy,
-            b = this.vertical ? dy : dx;
-
-        let snap_a, snap_b = this._snapOneDimention(b, this._offset());
-        if (snap_b / this._offset() % 2 == 0)
-            snap_a = this._snapOneDimention(a, this.size);
-        else snap_a = this._snap1DShifted(a, this.size);
-
-        return this.vertical ? [snap_a, snap_b] : [snap_b, snap_a];
+        let snap_x, snap_y = this._snapOneDimention(dy, this._offset());
+        if (snap_y / this._offset() % 2 == 0)
+            snap_x = this._snapOneDimention(dx, this.size);
+        else snap_x = this._snap1DShifted(dx, this.size);
+        return [snap_x, snap_y];
     }
 
     _snapOneDimention(est, period) {
@@ -308,9 +232,8 @@ class Grid {
         let t = d % this._offset(),
             k = this._size2()/2 - t;
         if (k >= 0) return this._quarter() + Math.floor(k/2);
-        // if (t > this._quarter()) return this._quarter() + Math.floor(k/2);
         else {
-            let q = (this._offset() - t + this._size2()/2);
+            let q = this._offset() - t + this._size2()/2;
             return this._quarter() + Math.floor(q/2);
         }
     }

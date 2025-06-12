@@ -3,11 +3,10 @@ const NEXT_PAGE = document.getElementById('nextPage'),
 
 
 class Swapper {
-    grid; puzzle; is_dragging; drax_x; drag_y; snap_x = 0; snap_y = 0;
+    grid; is_dragging; drax_x; drag_y; snap_x = 0; snap_y = 0;
 
-    constructor(grid, puzzle) {
+    constructor(grid) {
         this.grid = grid;
-        this.puzzle = puzzle;
         grid.el.oncontextmenu = (e) => { return false; };
         grid.el.onwheel = (e) => { this.wheel(e); };
         grid.el.onmousedown = (e) => { this.dragStart(e); };
@@ -24,9 +23,14 @@ class Swapper {
     dragStart(event) {
         if (this.is_dragging) return;
         if (event.preventDefault) event.preventDefault();
+
         this.is_dragging = true;
         this.drag_x = event.clientX;
         this.drag_y = event.clientY;
+
+        if (!event.action)
+            for (let tile of this.grid.tileArray('btn'))
+                tile.el.style.display = 'none';
     }
 
     dragMove(event) {
@@ -35,6 +39,8 @@ class Swapper {
             dy = event.clientY - this.drag_y;
         for (let tile of this.grid.tileArray('selected'))
             tile.shift(dx, dy);
+        for (let tile of this.grid.tileArray('btn'))
+            if (tile.isSelected()) tile.shift(dx, dy);
 
         let [snap_x, snap_y] = this.grid.snap(dx, dy);
         if (snap_x != this.snap_x || snap_y != this.snap_y) {
@@ -48,6 +54,8 @@ class Swapper {
         this.is_dragging = false;
         for (let tile of this.grid.tileArray('target'))
             tile.el.classList.remove('target');
+        for (let tile of this.grid.tileArray('btn'))
+            tile.el.style.display = 'block';
 
         if (event && event.action) this.act(event.action);
         else this.swap();
@@ -56,15 +64,21 @@ class Swapper {
         if (event && !event.quick_tap && selected.length == 1)
             selected[0].el.classList.remove('selected');
 
-        this.snap_x = 0;  this.snap_y = 0;  this.degree = 0;
-        if (this.grid.tileArray('fixed').length == this.grid.tileArray().length)
-            for (let tile of this.grid.tileArray()) tile.touch();
+        this.snap_x = 0;  this.snap_y = 0;  this.angle = 0;
+        if (this._allTilesAreFixed())
+            for (let tile of this.grid.tileArray('piece')) tile._shake();
+    }
+
+    _allTilesAreFixed() {
+        for (let tile of this.grid.tileArray('piece'))
+            if (!tile.isFixed()) return false
+        return true
     }
 
     act(action) {
-        if (action == 'PLUS') this.puzzle.incCount();
-        if (action == 'MINUS') this.puzzle.decCount();
-        if (action == 'ROTATE') this.puzzle.rotateRandom();
+        if (action == 'PLUS') this.grid.incCount();
+        if (action == 'MINUS') this.grid.decCount();
+        if (action == 'ROTATE') this.grid.rotateRandom();
         if (action == 'HOME') window.location = '/';
         if (action == 'NEXT') window.location = NEXT_PAGE.textContent;
         if (action == 'IMAGE') FILE_INPUT.click();
@@ -74,8 +88,7 @@ class Swapper {
     detectTarget(tile) {
         let x = tile.x + this.snap_x, y = tile.y + this.snap_y,
             target = this.grid.tiles[x+'|'+y];
-        if (target && !target.el.classList.contains('fixed'))
-            return target;
+        if (target && !target.isFixed()) return target;
     }
 
     resetTargets(tile) {
@@ -88,37 +101,35 @@ class Swapper {
         }
     }
 
-    swap() {
-        let tile, target, vacant_tiles = [], target_tiles = [];
+    swap() {  // tile can be both: selected and target at the same time
+        let x, y, tile, target, spots = [], selected = [], targets = [];
 
         for (tile of this.grid.tileArray('selected')) {
-            target = this.detectTarget(tile);  // important to get target first
-            if (target){
-                target.el.appendChild(tile.el.firstChild);
-                target_tiles.push(target);
-                tile.resetPosition();  // after do resetting position
+            target = this.detectTarget(tile);
+            if (target) {
+                tile.x = target.grid_x; tile.y = target.grid_y;
+                spots.push(tile.grid_x+'|'+tile.grid_y);
+                selected.push(tile);
+                targets.push(target);
             }
             else tile.resetPosition();
         }
 
-        for (tile of this.grid.tileArray('selected')) {
-            tile.el.classList.remove('selected');
-            if (tile.el.children.length == 0)
-                vacant_tiles.push(tile);
+        for (target of targets)
+            if (spots.includes(target.grid_x+'|'+target.grid_y))
+                spots.splice(spots.indexOf(target.grid_x+'|'+target.grid_y), 1);
+
+        for (target of targets) {
+            if (target.isSelected()) continue;
+            [x, y] = spots.pop().split('|');
+            this.grid.putInto(target, Number(x), Number(y));
         }
 
-        for (target of target_tiles) {
-            if (target.el.children.length == 2) {
-                tile = vacant_tiles.pop();
-                tile.el.appendChild(target.el.firstChild);
-                if (this.grid.fix) tile.fixIfInPlace();
-            }
-            if (this.grid.fix) target.fixIfInPlace();
-            target.touch();
-        }
+        for (tile of selected)
+            this.grid.putInto(tile, tile.x, tile.y);
     }
 
-    rotor_x;  rotor_y;  rotor_snap = 0;  degree = 0;
+    rotor_x;  rotor_y;  rotor_snap = 0;  angle = 0;
 
     touchStart(event) {
         if (event.touches.length > 2) return;
@@ -159,11 +170,11 @@ class Swapper {
     wheel(event) {
         if (!this.is_dragging) return;
         if (event.preventDefault) event.preventDefault();
-        this.degree += event.deltaY > 0 ? 60 : -60;
-        this.degree = (this.degree + 360) % 360;
+        this.angle += event.deltaY > 0 ? 60 : -60;
+        this.angle = (this.angle + 360) % 360;
         let ref_tile = this._getReferenceTile(event);
         for (let tile of this.grid.tileArray('selected')) {
-            tile.rotateAgainst(ref_tile, this.degree);
+            tile.rotateAgainst(ref_tile, this.angle);
             this.dragMove(event);
             this.resetTargets();
         }
