@@ -39,8 +39,6 @@ class Swapper {
             dy = event.clientY - this.drag_y;
         for (let tile of this.grid.tileArray('selected'))
             tile.shift(dx, dy);
-        for (let tile of this.grid.tileArray('btn'))
-            if (tile.isSelected()) tile.shift(dx, dy);
 
         let [snap_x, snap_y] = this.grid.snap(dx, dy);
         if (snap_x != this.snap_x || snap_y != this.snap_y) {
@@ -87,8 +85,17 @@ class Swapper {
 
     detectTarget(tile) {
         let x = tile.x + this.snap_x, y = tile.y + this.snap_y,
-            target = this.grid.tiles[x+'|'+y];
+            target = this._findClose(x, y);
         if (target && !target.isFixed()) return target;
+    }
+
+    _findClose(x, y) {
+        let i, j, target;
+        for (i of [0, 1, -1, 2, -2, 3, -3])
+            for (j of [0, 1, -1, 2, -2, 3, -3]) {
+                target = this.grid.tiles[(x+i) +'|'+ (y+j)];
+                if (target) return target;
+            }
     }
 
     resetTargets(tile) {
@@ -178,7 +185,6 @@ class Swapper {
             this.dragMove(event);
             this.resetTargets();
         }
-
     }
 
     _getReferenceTile(e) {

@@ -5,6 +5,7 @@ let grid = new Grid(document.body),
 
 grid.fitMenu();
 window.onload = () => { grid.fitPicture(big_picture); };
+document.body.style.overflow = 'hidden';
 
 
 FILE_INPUT.onchange = () => {

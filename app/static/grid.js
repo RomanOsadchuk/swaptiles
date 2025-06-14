@@ -100,7 +100,6 @@ class Grid {
             random_index = Math.floor(Math.random() * tiles.length);
             next_tile = tiles.splice(random_index, 1)[0];
             this.putInto(current_tile, next_tile.x, next_tile.y);
-            current_tile.putInto(next_tile.x, next_tile.y);
             current_tile = next_tile;
         }
         this.putInto(next_tile, first_x, first_y);
