@@ -37,7 +37,7 @@ class Swapper {
         if (!this.is_dragging) return;
         let dx = event.clientX - this.drag_x,
             dy = event.clientY - this.drag_y;
-        for (let tile of this.grid.tileArray('selected'))
+        for (let tile of this.grid.tileArray('active'))
             tile.shift(dx, dy);
 
         let [snap_x, snap_y] = this.grid.snap(dx, dy);
@@ -58,18 +58,18 @@ class Swapper {
         if (event && event.action) this.act(event.action);
         else this.swap();
 
-        let selected = this.grid.tileArray('selected');
-        if (event && !event.quick_tap && selected.length == 1)
-            selected[0].el.classList.remove('selected');
+        let active = this.grid.tileArray('active');
+        if (event && !event.quick_tap && active.length == 1)
+            active[0].el.classList.remove('active');
 
         this.snap_x = 0;  this.snap_y = 0;  this.angle = 0;
         if (this._allTilesAreFixed())
-            for (let tile of this.grid.tileArray('piece')) tile._shake();
+            for (let tile of this.grid.tileArray('piece')) tile.shake();
     }
 
     _allTilesAreFixed() {
         for (let tile of this.grid.tileArray('piece'))
-            if (!tile.isFixed()) return false
+            if (!tile.isLocked()) return false
         return true
     }
 
@@ -86,7 +86,7 @@ class Swapper {
     detectTarget(tile) {
         let x = tile.x + this.snap_x, y = tile.y + this.snap_y,
             target = this._findClose(x, y);
-        if (target && !target.isFixed()) return target;
+        if (target && !target.isLocked()) return target;
     }
 
     _findClose(x, y) {
@@ -101,38 +101,38 @@ class Swapper {
     resetTargets(tile) {
         for (let tile of this.grid.tileArray('target'))
             tile.el.classList.remove('target');
-        for (let tile of this.grid.tileArray('selected')) {
+        for (let tile of this.grid.tileArray('active')) {
             let target = this.detectTarget(tile);
-            if (target && !target.el.classList.contains('selected'))
+            if (target && !target.el.classList.contains('active'))
                 target.el.classList.add('target');
         }
     }
 
-    swap() {  // tile can be both: selected and target at the same time
-        let x, y, tile, target, spots = [], selected = [], targets = [];
+    swap() {  // tile can be both: active and target at the same time
+        let x, y, tile, target, spots = [], active = [], targets = [];
 
-        for (tile of this.grid.tileArray('selected')) {
+        for (tile of this.grid.tileArray('active')) {
             target = this.detectTarget(tile);
             if (target) {
-                tile.x = target.grid_x; tile.y = target.grid_y;
-                spots.push(tile.grid_x+'|'+tile.grid_y);
-                selected.push(tile);
+                tile.x = target.pre_x; tile.y = target.pre_y;
+                spots.push(tile.pre_x+'|'+tile.pre_y);
+                active.push(tile);
                 targets.push(target);
             }
             else tile.resetPosition();
         }
 
         for (target of targets)
-            if (spots.includes(target.grid_x+'|'+target.grid_y))
-                spots.splice(spots.indexOf(target.grid_x+'|'+target.grid_y), 1);
+            if (spots.includes(target.pre_x+'|'+target.pre_y))
+                spots.splice(spots.indexOf(target.pre_x+'|'+target.pre_y), 1);
 
         for (target of targets) {
-            if (target.isSelected()) continue;
+            if (target.isActive()) continue;
             [x, y] = spots.pop().split('|');
             this.grid.putInto(target, Number(x), Number(y));
         }
 
-        for (tile of selected)
+        for (tile of active)
             this.grid.putInto(tile, tile.x, tile.y);
     }
 
@@ -180,7 +180,7 @@ class Swapper {
         this.angle += event.deltaY > 0 ? 60 : -60;
         this.angle = (this.angle + 360) % 360;
         let ref_tile = this._getReferenceTile(event);
-        for (let tile of this.grid.tileArray('selected')) {
+        for (let tile of this.grid.tileArray('active')) {
             tile.rotateAgainst(ref_tile, this.angle);
             this.dragMove(event);
             this.resetTargets();
@@ -188,7 +188,7 @@ class Swapper {
     }
 
     _getReferenceTile(e) {
-        let selected = this.grid.tileArray('selected');
-        return selected[Math.floor(selected.length / 2)];
+        let active = this.grid.tileArray('active');
+        return active[Math.floor(active.length / 2)];
     }
 }

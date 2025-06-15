@@ -1,7 +1,7 @@
 
 
 class Grid {
-    el; size; count = 4; tiles = {};
+    x0 = 0; y0 = 0; el; size; count = 4; tiles = {};
 
     _size2() { return Math.floor(this.size * 2 / ROOT_3); }
     _offset() { return Math.ceil(this.size * ROOT_3 / 2); }
@@ -13,11 +13,9 @@ class Grid {
     }
 
     _removeTiles(class_name) {
-        let tile, pos;
         for (let tile of this.tileArray(class_name)) {
             tile.el.remove();
-            pos = tile.grid_x + '|' + tile.grid_y;
-            delete this.tiles[pos];
+            delete this.tiles[tile.x + '|' + tile.y];
         }
     }
 
@@ -79,7 +77,7 @@ class Grid {
         while (true) {
             CTX.fillRect(0, 0, w, h);
             CTX.drawImage(picture, x, y, w, h, 0, 0, w, h);
-            this.createTile(x + pic_x, y + pic_y, CANVAS.toDataURL('image/jpeg'));
+            this.createTile(x + pic_x, y + pic_y, CANVAS.toDataURL('image/jpeg'), 'LOCK');
 
             x += w;
             if (x+w > picture.width + this.size / 2) {
@@ -107,7 +105,6 @@ class Grid {
 
     fitTitle() {
         this.size = 70;
-        this.el.classList.add('vertical');
         this.el.style.height = '150px';
         let drawer = new Drawer(this.size, true);
 
@@ -122,9 +119,6 @@ class Grid {
             this.createTile(x, y, drawer.drawChar(letter));
             x += this.size;
         }
-
-        for (tile of this.tileArray())
-            { tile.true_x = -1; tile.true_y = -1; }
     }
 
     fitGalleries() {
@@ -187,7 +181,7 @@ class Grid {
 
     rotateRandom() {
         for (let tile of this.tileArray('piece'))
-            if (!tile.isFixed()) tile.rotateRandom();
+            if (!tile.isLocked()) tile.rotateRandom();
     }
 
     createTile(x, y, image_src, action) {
@@ -197,9 +191,8 @@ class Grid {
     }
 
     putInto(tile, x, y) {
-        tile.putInto(x, y);
         this.tiles[x+'|'+y] = tile;
-        if (tile.isFixed()) tile._shake();
+        tile.updatePosition(x, y);
     }
 
     tileArray(class_name) {
@@ -210,6 +203,8 @@ class Grid {
                 result.push(tile);
         return result;
     }
+
+    snapAbsolute(x, y) { return this.snapDelta(x-this.x0, y-this.y0); }
 
     snap(dx, dy) {
         let snap_x, snap_y = this._snapOneDimention(dy, this._offset());
