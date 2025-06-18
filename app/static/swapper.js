@@ -116,23 +116,26 @@ class Swapper {
             this.grid.putInto(tile, tile.x, tile.y);
     }
 
-    rotor_x;  rotor_y;  rotor_snap = 0;  angle = 0;
+    rotor_0;  rotor_snap = 0;  angle = 0;
+
+    _getRotor(event) { // vector from touch.0 to touch.1
+        return {x: event.touches[1].clientX - event.touches[0].clientX,
+                y: event.touches[1].clientY - event.touches[0].clientY};
+    }
 
     touchStart(event) {
         if (event.touches.length > 2) return;
         if (event.touches.length > 1) {
             this.rotor_snap = 0;
-            this.rotor_x = event.touches[1].clientX - event.touches[0].clientX;
-            this.rotor_y = event.touches[1].clientY - event.touches[0].clientY;
+            this.rotor_0 = this._getRotor(event);
         }
         else this.dragStart(event.touches[0]);
     }
 
     touchMove(event) {
         if (event.touches.length > 1) {
-            let x = event.touches[1].clientX - event.touches[0].clientX,
-                y = event.touches[1].clientY - event.touches[0].clientY,
-                alpha = this._angelBetweenVectors(this.rotor_x, this.rotor_y, x, y);
+            let rotor = this._getRotor(event),
+                alpha = this._angelBetweenVectors(this.rotor_0, rotor);
 
             if (Math.abs(alpha - this.rotor_snap) > 10) {
                 this.wheel({deltaY: alpha - this.rotor_snap});
@@ -142,8 +145,8 @@ class Swapper {
         this.dragMove(event.touches[0]);
     }
 
-    _angelBetweenVectors(x1, y1, x2, y2) {
-        let angle = Math.atan2(y2, x2) - Math.atan2(y1, x1);
+    _angelBetweenVectors(vec1, vec2) {
+        let angle = Math.atan2(vec2.y, vec2.x) - Math.atan2(vec1.y, vec1.x);
         angle = angle * (180 / Math.PI);
         if (angle > 180) angle -= 360;
         if (angle < -180) angle += 360;
