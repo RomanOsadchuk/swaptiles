@@ -97,16 +97,14 @@ class Tile {
         this._setAngle([0, 60, 120, 180, 240, 300][rand]);
     }
 
-    rotateAgainst(ref_tile, degree) {
+    rotateAgainst(point, degree) {
         this._setAngle(this.pre_angle + degree);
-        if (this == ref_tile) return;
-
         let rad = (degree / 180 * Math.PI),
-            dx = this.pre_x - ref_tile.pre_x,
-            dy = this.pre_y - ref_tile.pre_y;
+            dx = this.pre_x - point.x,
+            dy = this.pre_y - point.y;
 
-        this.x = Math.round(ref_tile.pre_x + Math.cos(rad) * dx - Math.sin(rad) * dy);
-        this.y = Math.round(ref_tile.pre_y + Math.sin(rad) * dx + Math.cos(rad) * dy);
+        this.x = Math.round(point.x + Math.cos(rad) * dx - Math.sin(rad) * dy);
+        this.y = Math.round(point.y + Math.sin(rad) * dx + Math.cos(rad) * dy);
     }
 
     shake(options) {

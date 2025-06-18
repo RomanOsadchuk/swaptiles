@@ -3,7 +3,7 @@ const NEXT_PAGE = document.getElementById('nextPage'),
 
 
 class Swapper {
-    grid; is_dragging; drax_x; drag_y; snap_x = 0; snap_y = 0;
+    grid; drag_touch; drag_delta = {x: 0, y: 0};
 
     constructor(grid) {
         this.grid = grid;
@@ -21,12 +21,9 @@ class Swapper {
     }
 
     dragStart(event) {
-        if (this.is_dragging) return;
+        if (this.drag_touch) return;
         if (event.preventDefault) event.preventDefault();
-
-        this.is_dragging = true;
-        this.drag_x = event.clientX;
-        this.drag_y = event.clientY;
+        this.drag_touch = {x: event.clientX, y: event.clientY};
 
         if (!event.action)
             for (let tile of this.grid.tileArray('btn'))
@@ -34,22 +31,19 @@ class Swapper {
     }
 
     dragMove(event) {
-        if (!this.is_dragging) return;
-        let dx = event.clientX - this.drag_x,
-            dy = event.clientY - this.drag_y;
-        for (let tile of this.grid.tileArray('active'))
-            tile.shift(dx, dy);
+        if (!this.drag_touch) return;
+        this.drag_delta = {x: event.clientX - this.drag_touch.x,
+                           y: event.clientY - this.drag_touch.y}
 
-        let [snap_x, snap_y] = this.grid.snap(dx, dy);
-        if (snap_x != this.snap_x || snap_y != this.snap_y) {
-            this.snap_x = snap_x;
-            this.snap_y = snap_y;
-            this.resetTargets();
-        }
+        for (let tile of this.grid.tileArray('active'))
+            tile.shift(this.drag_delta.x, this.drag_delta.y);
+        this.resetTargets();
     }
 
     dragStop(event) {
-        this.is_dragging = false;
+        if (!this.drag_touch) return;
+        this.drag_touch = undefined;
+
         for (let tile of this.grid.tileArray('target'))
             tile.el.classList.remove('target');
         for (let tile of this.grid.tileArray('btn'))
@@ -62,15 +56,15 @@ class Swapper {
         if (event && !event.quick_tap && active.length == 1)
             active[0].el.classList.remove('active');
 
-        this.snap_x = 0;  this.snap_y = 0;  this.angle = 0;
-        if (this._allTilesAreFixed())
+        this.drag_delta = {x: 0, y: 0};  this.angle = 0;
+        if (this._allTilesAreLocked())
             for (let tile of this.grid.tileArray('piece')) tile.shake();
     }
 
-    _allTilesAreFixed() {
+    _allTilesAreLocked() {
         for (let tile of this.grid.tileArray('piece'))
-            if (!tile.isLocked()) return false
-        return true
+            if (!tile.isLocked()) return false;
+        return true;
     }
 
     act(action) {
@@ -83,27 +77,13 @@ class Swapper {
         if (action == 'INFO') window.alert('Painting Author Year');
     }
 
-    detectTarget(tile) {
-        let x = tile.x + this.snap_x, y = tile.y + this.snap_y,
-            target = this._findClose(x, y);
-        if (target && !target.isLocked()) return target;
-    }
-
-    _findClose(x, y) {
-        let i, j, target;
-        for (i of [0, 1, -1, 2, -2, 3, -3])
-            for (j of [0, 1, -1, 2, -2, 3, -3]) {
-                target = this.grid.tiles[(x+i) +'|'+ (y+j)];
-                if (target) return target;
-            }
-    }
-
     resetTargets(tile) {
         for (let tile of this.grid.tileArray('target'))
             tile.el.classList.remove('target');
+
         for (let tile of this.grid.tileArray('active')) {
-            let target = this.detectTarget(tile);
-            if (target && !target.el.classList.contains('active'))
+            let target = this.grid.snapTile(tile, this.drag_delta);
+            if (target && !target.isActive())
                 target.el.classList.add('target');
         }
     }
@@ -112,7 +92,7 @@ class Swapper {
         let x, y, tile, target, spots = [], active = [], targets = [];
 
         for (tile of this.grid.tileArray('active')) {
-            target = this.detectTarget(tile);
+            target = this.grid.snapTile(tile, this.drag_delta);
             if (target) {
                 tile.x = target.pre_x; tile.y = target.pre_y;
                 spots.push(tile.pre_x+'|'+tile.pre_y);
@@ -171,24 +151,31 @@ class Swapper {
     }
 
     touchStop(event) {
+        if (this.grid.el.id != 'galleries') event.preventDefault();
         if (event.touches.length == 0) this.dragStop(event);
     }
 
     wheel(event) {
-        if (!this.is_dragging) return;
+        if (!this.drag_touch) return;
         if (event.preventDefault) event.preventDefault();
         this.angle += event.deltaY > 0 ? 60 : -60;
         this.angle = (this.angle + 360) % 360;
-        let ref_tile = this._getReferenceTile(event);
+
+        let rotation_point = this._getRotationPoint();
         for (let tile of this.grid.tileArray('active')) {
-            tile.rotateAgainst(ref_tile, this.angle);
+            tile.rotateAgainst(rotation_point, this.angle);
             this.dragMove(event);
             this.resetTargets();
         }
     }
 
-    _getReferenceTile(e) {
-        let active = this.grid.tileArray('active');
-        return active[Math.floor(active.length / 2)];
+    _getRotationPoint() {
+        let exes = [], whys = [];
+        for (let tile of this.grid.tileArray('active'))
+            { exes.push(tile.pre_x);  whys.push(tile.pre_y); }
+
+        exes.sort((a,b) => a - b);  whys.sort((a,b) => a - b);
+        return {x: Math.floor((exes[0] + exes[exes.length-1]) / 2),
+                y: Math.floor((whys[0] + whys[whys.length-1]) / 2)};
     }
 }

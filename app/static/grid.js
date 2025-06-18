@@ -204,9 +204,16 @@ class Grid {
         return result;
     }
 
-    snapAbsolute(x, y) { return this.snapDelta(x-this.x0, y-this.y0); }
+    snapTile(tile, delta) {
+        let x = tile.x + delta.x, y = tile.y + delta.y;
+        let [sn_x, sn_y] = this._snap(x-tile.pre_x, y-tile.pre_y);
+        x = tile.pre_x + sn_x;  y = tile.pre_y + sn_y;
 
-    snap(dx, dy) {
+        let target = this.tiles[x+'|'+y];
+        if (target && !target.isLocked()) return target;
+    }
+
+    _snap(dx, dy) {
         let snap_x, snap_y = this._snapOneDimention(dy, this._offset());
         if (snap_y / this._offset() % 2 == 0)
             snap_x = this._snapOneDimention(dx, this.size);
