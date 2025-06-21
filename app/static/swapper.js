@@ -24,6 +24,7 @@ class Swapper {
         if (this.drag_touch) return;
         if (event.preventDefault) event.preventDefault();
         this.drag_touch = {x: event.clientX, y: event.clientY};
+        this.grid.activateNeighbours();
 
         if (!event.action)
             for (let tile of this.grid.tileArray('btn'))
@@ -94,8 +95,8 @@ class Swapper {
         for (tile of this.grid.tileArray('active')) {
             target = this.grid.snapTile(tile, this.drag_delta);
             if (target) {
-                tile.x = target.pre_x; tile.y = target.pre_y;
-                spots.push(tile.pre_x+'|'+tile.pre_y);
+                tile.x = target.prev_state.x; tile.y = target.prev_state.y;
+                spots.push(tile.prev_state.x+'|'+tile.prev_state.y);
                 active.push(tile);
                 targets.push(target);
             }
@@ -103,8 +104,8 @@ class Swapper {
         }
 
         for (target of targets)
-            if (spots.includes(target.pre_x+'|'+target.pre_y))
-                spots.splice(spots.indexOf(target.pre_x+'|'+target.pre_y), 1);
+            if (spots.includes(target.prev_state.x+'|'+target.prev_state.y))
+                spots.splice(spots.indexOf(target.prev_state.x+'|'+target.prev_state.y), 1);
 
         for (target of targets) {
             if (target.isActive()) continue;
@@ -175,7 +176,7 @@ class Swapper {
     _getRotationPoint() {
         let exes = [], whys = [];
         for (let tile of this.grid.tileArray('active'))
-            { exes.push(tile.pre_x);  whys.push(tile.pre_y); }
+            { exes.push(tile.prev_state.x);  whys.push(tile.prev_state.y); }
 
         exes.sort((a,b) => a - b);  whys.sort((a,b) => a - b);
         return {x: Math.floor((exes[0] + exes[exes.length-1]) / 2),

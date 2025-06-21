@@ -206,8 +206,8 @@ class Grid {
 
     snapTile(tile, delta) {
         let x = tile.x + delta.x, y = tile.y + delta.y;
-        let [sn_x, sn_y] = this._snap(x-tile.pre_x, y-tile.pre_y);
-        x = tile.pre_x + sn_x;  y = tile.pre_y + sn_y;
+        let [sn_x, sn_y] = this._snap(x-tile.prev_state.x, y-tile.prev_state.y);
+        x = tile.prev_state.x + sn_x;  y = tile.prev_state.y + sn_y;
 
         let target = this.tiles[x+'|'+y];
         if (target && !target.isLocked()) return target;
@@ -237,5 +237,13 @@ class Grid {
             let q = this._offset() - t + this._size2()/2;
             return this._quarter() + Math.floor(q/2);
         }
+    }
+
+    activateNeighbours() {
+        // let deltas = [{x: this.size, y: 0}, {x: this.size/2; y: this._offset()}, {x: this.size/2; y:-this._offset(),
+        //                x:-this.size, y: 0}, {x:-this.size/2; y: this._offset()}, {x:-this.size/2; y:-this._offset()}];
+
+        console.log('activate neighbs');
+
     }
 }

@@ -1,12 +1,11 @@
 
 
 class Tile {
-    el; x; y; init_position; angle; action;
+    el; x; y; angle; action; init_state = {}; touched_at = 0; prev_state;
 
     constructor(x, y, image_src, action) {
         this.x = x;  this.y = y;  this.angle = 0;
-        this.pre_x = x;  this.pre_y = y;  this.pre_angle = y;
-        if (action == 'LOCK') this.init_position = x+':'+y;
+        if (action == 'LOCK') this.init_state = {x: x, y: y};
         else this.action = action;
 
         this.el = document.createElement('img');
@@ -17,6 +16,7 @@ class Tile {
         if (this.action) this.el.classList.add('btn');
         else this.el.classList.add('piece');
 
+        this._savePrevState();
         this.el.oncontextmenu = (e) => { return false; };
         this.el.onmousedown = (e) => { this.touch(e); };
         this.el.onmouseup = (e) => { this.release(e); };
@@ -27,48 +27,52 @@ class Tile {
     }
 
     isLocked() {
-        let by_position = this.x+':'+this.y == this.init_position;
-        return by_position && this.angle == 0;
+        return this.x == this.init_state.x && this.y == this.init_state.y && this.angle == 0;
     }
 
     isActive() { return this.el.classList.contains('active'); }
 
-    pre_time = 0; pre_active; pre_angle; pre_x; pre_y;
+    _savePrevState() {
+        this.prev_state = {x: this.x, y: this.y, angle: this.angle, active: this.isActive()};
+    }
+
+    // touched_at = 0; prev_state.active; prev_state.angle; prev_state.x; prev_state.y;
 
     touch(event) {
-        // if (event) event.preventDefault();
+        event.preventDefault();
         if (event.touches && event.touches.length > 1) return;
         if (this.isLocked()) return this.shake();
 
         event.action = this.action;
-        this.pre_time = Date.now(); this.pre_x = this.x;  this.pre_y = this.y;
-        this.pre_active = this.isActive();  this.pre_angle = this.angle;
+        this.touched_at = Date.now();
+        this._savePrevState();
         this.el.classList.add('active');
     }
 
     release(event) {
-        this.shift(0, 0);
         if (event.touches && event.touches.length > 0) return;
+        this.shift(0, 0);
         if (this.action) this.el.classList.remove('active');
-        if (Date.now() - this.pre_time > 300) return;
+        if (Date.now() - this.touched_at > 300) return;
 
-        if (this.pre_active) this.el.classList.remove('active');
+        if (this.prev_state.active) this.el.classList.remove('active');
         event.quick_tap = true;
         event.action = this.action;
     }
 
     resetPosition() {
         this.el.classList.remove('active');
-        this.x = this.pre_x;  this.y = this.pre_y;
+        this.x = this.prev_state.x;
+        this.y = this.prev_state.y;
         this.shift(0, 0);
-        this._setAngle(this.pre_angle);
+        this._setAngle(this.prev_state.angle);
     }
 
     updatePosition(x, y) {
-        this.x = x;  this.pre_x = x;
-        this.y = y;  this.pre_y = y;
-        this.pre_angle = this.angle;
+        this.x = x;
+        this.y = y;
         this.shift(0, 0);
+        this._savePrevState();
         if (this.isLocked()) {
             this.el.classList.remove('active');
             this.shake();
@@ -98,10 +102,10 @@ class Tile {
     }
 
     rotateAgainst(point, degree) {
-        this._setAngle(this.pre_angle + degree);
+        this._setAngle(this.prev_state.angle + degree);
         let rad = (degree / 180 * Math.PI),
-            dx = this.pre_x - point.x,
-            dy = this.pre_y - point.y;
+            dx = this.prev_state.x - point.x,
+            dy = this.prev_state.y - point.y;
 
         this.x = Math.round(point.x + Math.cos(rad) * dx - Math.sin(rad) * dy);
         this.y = Math.round(point.y + Math.sin(rad) * dx + Math.cos(rad) * dy);
