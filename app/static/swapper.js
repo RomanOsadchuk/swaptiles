@@ -53,9 +53,12 @@ class Swapper {
         if (event && event.action) this.act(event.action);
         else this.swap();
 
-        let active = this.grid.tileArray('active');
-        if (event && !event.quick_tap && active.length == 1)
-            active[0].el.classList.remove('active');
+        for (let tile of this.grid.tileArray('active'))
+            tile.el.classList.remove('active');
+
+        if (event.elToActivate)
+            event.elToActivate.classList.add('active');
+        this.grid.activateNeighbours();
 
         this.drag_delta = {x: 0, y: 0};  this.angle = 0;
         if (this._allTilesAreLocked())

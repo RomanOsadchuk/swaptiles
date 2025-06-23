@@ -3,8 +3,8 @@
 class Grid {
     x0 = 0; y0 = 0; el; size; count = 4; tiles = {};
 
-    _size2() { return Math.floor(this.size * 2 / ROOT_3); }
-    _offset() { return Math.ceil(this.size * ROOT_3 / 2); }
+    _size2() { return Math.ceil(this.size * 2 / ROOT_3); }
+    _offset() { return Math.floor(this.size * ROOT_3 / 2); }
     _quarter() { return this._size2() - this._offset(); }
 
     constructor(elenemt_) {
@@ -211,6 +211,7 @@ class Grid {
 
         let target = this.tiles[x+'|'+y];
         if (target && !target.isLocked()) return target;
+        if (target && target.el == tile.el) return target;
     }
 
     _snap(dx, dy) {
@@ -239,11 +240,36 @@ class Grid {
         }
     }
 
+    _getFromPoint(x, y) { return this.tiles[x+'|'+y]; }
+
     activateNeighbours() {
-        // let deltas = [{x: this.size, y: 0}, {x: this.size/2; y: this._offset()}, {x: this.size/2; y:-this._offset(),
-        //                x:-this.size, y: 0}, {x:-this.size/2; y: this._offset()}, {x:-this.size/2; y:-this._offset()}];
+        let cent = this.tileArray('active')[0];
+        if (cent) this._checkNeib(cent);
+    }
 
-        console.log('activate neighbs');
+    _neibDelta() {
+        return {0: {x: this.size,    y: 0},
+               60: {x: this.size/2,  y: this._offset()},
+              120: {x: -this.size/2, y: this._offset()},
+              180: {x: -this.size,   y: 0},
+              240: {x: -this.size/2, y: -this._offset()},
+              300: {x: this.size/2,  y: -this._offset()}}
+    }
 
+    _checkNeib(tile) {
+        let deltas = this._neibDelta(), delta, neib, dir;
+        tile.el.classList.add('active');
+
+        for (dir of [0, 60, 120, 180, 240, 300]) {
+            delta = deltas[(tile.angle + dir) % 360];
+            neib = this._getFromPoint(tile.x + delta.x, tile.y + delta.y);
+            if (!neib) continue;
+            if (neib.isActive() || neib.isLocked()) continue;
+
+            if (neib.angle != tile.angle) continue;
+            if (tile.init_state.x + deltas[dir].x != neib.init_state.x) continue;
+            if (tile.init_state.y + deltas[dir].y != neib.init_state.y) continue;
+            this._checkNeib(neib);
+        }
     }
 }

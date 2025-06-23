@@ -1,4 +1,6 @@
 
+function _activeCount() { return document.getElementsByClassName('active').length; }
+
 
 class Tile {
     el; x; y; angle; action; init_state = {}; touched_at = 0; prev_state;
@@ -27,13 +29,15 @@ class Tile {
     }
 
     isLocked() {
-        return this.x == this.init_state.x && this.y == this.init_state.y && this.angle == 0;
+        return this.prev_state.x == this.init_state.x && 
+               this.prev_state.y == this.init_state.y &&
+               this.angle == 0;
     }
 
     isActive() { return this.el.classList.contains('active'); }
 
     _savePrevState() {
-        this.prev_state = {x: this.x, y: this.y, angle: this.angle, active: this.isActive()};
+        this.prev_state = {x: this.x, y: this.y, angle: this.angle};
     }
 
     // touched_at = 0; prev_state.active; prev_state.angle; prev_state.x; prev_state.y;
@@ -46,17 +50,16 @@ class Tile {
         event.action = this.action;
         this.touched_at = Date.now();
         this._savePrevState();
-        this.el.classList.add('active');
+        if (_activeCount() == 0) this.el.classList.add('active');
     }
 
     release(event) {
+        // this.shift(0, 0);
         if (event.touches && event.touches.length > 0) return;
-        this.shift(0, 0);
-        if (this.action) this.el.classList.remove('active');
+        if (this.action) this.resetPosition();
         if (Date.now() - this.touched_at > 300) return;
 
-        if (this.prev_state.active) this.el.classList.remove('active');
-        event.quick_tap = true;
+        if (!this.action) event.elToActivate = this.el;
         event.action = this.action;
     }
 
@@ -91,9 +94,9 @@ class Tile {
 
     rotateWheel(event) {
         event.preventDefault();
-        if (this.isLocked()) return this.shake();
+        if (this.isLocked() && !this.isActive()) return this.shake();
         this._setAngle(this.angle + (event.deltaY > 0 ? 60 : -60));
-        if (this.isLocked()) this.shake();
+        if (this.isLocked() && !this.isActive()) this.shake();
     }
 
     rotateRandom() {
