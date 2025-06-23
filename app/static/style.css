@@ -8,7 +8,7 @@ body, html {
 
 img {
     position: absolute;
-    clip-path: polygon(50% 1%, 99% 25%, 99% 75%, 50% 99%, 1% 75%, 1% 25%);
+    clip-path: polygon(50% 1.5%, 99% 25%, 99% 75%, 50% 98.5%, 1% 75%, 1% 25%);
 }
 .btn {
     z-index: 5;

@@ -9,7 +9,7 @@ class Swapper {
         this.grid = grid;
         grid.el.oncontextmenu = (e) => { return false; };
         grid.el.onwheel = (e) => { this.wheel(e); };
-        grid.el.onmousedown = (e) => { this.dragStart(e); };
+        grid.el.onmousedown = (e) => { this.dragStart(e, false); };
         grid.el.onmousemove = (e) => { this.dragMove(e); };
         grid.el.onmouseleave = (e) => { this.dragStop(e); };
         grid.el.onmouseup = (e) => { this.dragStop(e); };
@@ -20,15 +20,15 @@ class Swapper {
         grid.el.addEventListener("touchcancel", (e) => { this.touchStop(e); });
     }
 
-    dragStart(event) {
+    dragStart(event, tmp_action) {
         if (this.drag_touch) return;
         if (event.preventDefault) event.preventDefault();
         this.drag_touch = {x: event.clientX, y: event.clientY};
         this.grid.activateNeighbours();
 
-        if (!event.action)
-            for (let tile of this.grid.tileArray('btn'))
-                tile.el.style.display = 'none';
+        if (event.action || tmp_action) return;
+        for (let tile of this.grid.tileArray('btn'))
+            tile.el.style.display = 'none';
     }
 
     dragMove(event) {
@@ -133,7 +133,7 @@ class Swapper {
             this.rotor_snap = 0;
             this.rotor_0 = this._getRotor(event);
         }
-        else this.dragStart(event.touches[0]);
+        else this.dragStart(event.touches[0], event.action);
     }
 
     touchMove(event) {

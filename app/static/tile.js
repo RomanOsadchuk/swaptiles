@@ -47,7 +47,7 @@ class Tile {
         if (event.touches && event.touches.length > 1) return;
         if (this.isLocked()) return this.shake();
 
-        event.action = this.action;
+        event.action = this._getAction();
         this.touched_at = Date.now();
         this._savePrevState();
         if (_activeCount() == 0) this.el.classList.add('active');
@@ -60,7 +60,7 @@ class Tile {
         if (Date.now() - this.touched_at > 300) return;
 
         if (!this.action) event.elToActivate = this.el;
-        event.action = this.action;
+        event.action = this._getAction();
     }
 
     resetPosition() {
@@ -68,7 +68,7 @@ class Tile {
         this.x = this.prev_state.x;
         this.y = this.prev_state.y;
         this.shift(0, 0);
-        this._setAngle(this.prev_state.angle);
+        if (!this.action) this._setAngle(this.prev_state.angle);
     }
 
     updatePosition(x, y) {
@@ -83,6 +83,7 @@ class Tile {
     }
 
     shift(dx, dy) {
+        if (this.action) return;
         this.el.style.left = this.x + dx + 'px';
         this.el.style.top = this.y + dy + 'px';
     }
@@ -126,5 +127,11 @@ class Tile {
             this.shift(dx, dy);
             setTimeout(() => { this.shake(options); }, 50)
         }
+    }
+
+    _getAction() {
+        if (this.action == 'NEXT' && this.angle == 300) return 'HOME';
+        if (this.action == 'MINUS' && this.angle == 300) return 'ROTATE';
+        return this.action;
     }
 }

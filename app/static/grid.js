@@ -1,3 +1,4 @@
+const MOBILE = /Mobi|Android|iPhone/i.test(navigator.userAgent);
 
 
 class Grid {
@@ -22,27 +23,18 @@ class Grid {
     fitMenu(actions) {
         this._removeTiles();
 
-        let btn_size = Math.floor(window.innerWidth / 7);
-        if (btn_size > 90) btn_size = 90;
+        let btn_size = MOBILE ? 50 : 80;
         let drawer = new Drawer(btn_size, true), x = 10, y = 10;
+        this.createTile(x, y, drawer.draw('NEXT'), 'NEXT');
 
-        for (let action of ['HOME', 'NEXT']) {
-            this.createTile(x, y, drawer.draw(action), action);
-            x += btn_size;
-        }
-
-        x = window.innerWidth - 10 - 2 * btn_size;
-        for (let action of ['IMAGE', 'INFO']) {
-            this.createTile(x, y, drawer.draw(action), action);
-            x += btn_size;
-        }
+        x = window.innerWidth - 10 - btn_size;
+        this.createTile(x, y, drawer.draw('IMAGE'), 'IMAGE');
 
         y = window.innerHeight - 10 - Math.round(btn_size * 2 / ROOT_3);
-        x = Math.floor(window.innerWidth / 2 - 1.5 * btn_size);
-        for (let action of ['MINUS', 'ROTATE', 'PLUS']) {
-            this.createTile(x, y, drawer.draw(action), action);
-            x += btn_size;
-        }
+        this.createTile(x, y, drawer.draw('PLUS'), 'PLUS');
+
+        x = 10;
+        this.createTile(x, y, drawer.draw('MINUS'), 'MINUS');
     }
 
     fitPicture(big_picture) {
