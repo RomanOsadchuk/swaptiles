@@ -172,8 +172,8 @@ class Grid {
     }
 
     rotateRandom() {
-        for (let tile of this.tileArray('piece'))
-            if (!tile.isLocked()) tile.rotateRandom();
+        this._crop(document.getElementById('fittedPicture'));
+        for (let tile of this.tileArray('piece')) tile.rotateRandom();
     }
 
     createTile(x, y, image_src, action) {

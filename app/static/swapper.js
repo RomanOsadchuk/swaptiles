@@ -23,6 +23,7 @@ class Swapper {
     dragStart(event, tmp_action) {
         if (this.drag_touch) return;
         if (event.preventDefault) event.preventDefault();
+        this.grid.el.style.cursor = 'pointer';
         this.drag_touch = {x: event.clientX, y: event.clientY};
         this.grid.activateNeighbours();
 
@@ -44,6 +45,7 @@ class Swapper {
     dragStop(event) {
         if (!this.drag_touch) return;
         this.drag_touch = undefined;
+        this.grid.el.style.cursor = 'default';
 
         for (let tile of this.grid.tileArray('target'))
             tile.el.classList.remove('target');

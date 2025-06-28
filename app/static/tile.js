@@ -131,7 +131,7 @@ class Tile {
 
     _getAction() {
         if (this.action == 'NEXT' && this.angle == 300) return 'HOME';
-        if (this.action == 'MINUS' && this.angle == 300) return 'ROTATE';
+        if (this.action == 'PLUS' && this.angle != 0 && this.angle != 180) return 'ROTATE';
         return this.action;
     }
 }
