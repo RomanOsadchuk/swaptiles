@@ -1,9 +1,7 @@
 
-function _activeCount() { return document.getElementsByClassName('active').length; }
-
 
 class Tile {
-    el; x; y; angle; action; init_state = {}; touched_at = 0; prev_state;
+    el; x; y; angle; action; init_state = {}; prev_state;
 
     constructor(x, y, image_src, action) {
         this.x = x;  this.y = y;  this.angle = 0;
@@ -40,26 +38,19 @@ class Tile {
         this.prev_state = {x: this.x, y: this.y, angle: this.angle};
     }
 
-    // touched_at = 0; prev_state.active; prev_state.angle; prev_state.x; prev_state.y;
-
     touch(event) {
         event.preventDefault();
         if (event.touches && event.touches.length > 1) return;
         if (this.isLocked()) return this.shake();
 
         event.action = this._getAction();
-        this.touched_at = Date.now();
         this._savePrevState();
-        if (_activeCount() == 0) this.el.classList.add('active');
+        this.el.classList.add('active');
     }
 
     release(event) {
-        // this.shift(0, 0);
         if (event.touches && event.touches.length > 0) return;
         if (this.action) this.resetPosition();
-        if (Date.now() - this.touched_at > 300) return;
-
-        if (!this.action) event.elToActivate = this.el;
         event.action = this._getAction();
     }
 

@@ -32,6 +32,11 @@ class Swapper {
             tile.el.style.display = 'none';
     }
 
+    _switchTouch(event) {
+        this.drag_touch = {x: event.clientX - this.drag_delta.x,
+                           y: event.clientY - this.drag_delta.y}
+    }
+
     dragMove(event) {
         if (!this.drag_touch) return;
         this.drag_delta = {x: event.clientX - this.drag_touch.x,
@@ -57,10 +62,6 @@ class Swapper {
 
         for (let tile of this.grid.tileArray('active'))
             tile.el.classList.remove('active');
-
-        if (event.elToActivate)
-            event.elToActivate.classList.add('active');
-        this.grid.activateNeighbours();
 
         this.drag_delta = {x: 0, y: 0};  this.angle = 0;
         if (this._allTilesAreLocked())
@@ -134,6 +135,7 @@ class Swapper {
         if (event.touches.length > 1) {
             this.rotor_snap = 0;
             this.rotor_0 = this._getRotor(event);
+            this._switchTouch(event.touches[0]);
         }
         else this.dragStart(event.touches[0], event.action);
     }
@@ -161,6 +163,7 @@ class Swapper {
 
     touchStop(event) {
         if (this.grid.el.id != 'galleries') event.preventDefault();
+        if (event.touches.length == 1) this._switchTouch(event.touches[0]);
         if (event.touches.length == 0) this.dragStop(event);
     }
 
