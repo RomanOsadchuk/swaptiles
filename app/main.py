@@ -20,6 +20,10 @@ async def alapolok(request):
     return templates.TemplateResponse('alapolok/page.html', context={'request': request})
 
 
+async def rects(request):
+    return templates.TemplateResponse('alapolok/rect_af.html', context={'request': request})
+
+
 async def homepage(request):
     context = {'request': request, 'galleries': getGalleries()}
     return templates.TemplateResponse('homepage.html', context=context)
@@ -44,6 +48,7 @@ app = Starlette(debug=True, routes=[
     Mount('/static', StaticFiles(directory=STATIC_DIR), name='static'),
     Route('/', homepage),
     Route('/alapolok', alapolok),
+    Route('/rects', rects),
     Route('/{gallery:str}', gallery),
     Route('/{gallery:str}/{painting:str}', painting),
 ])
